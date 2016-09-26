@@ -36,7 +36,7 @@ namespace graphics {
          inline Window& window() { return mWindow; }
 
          // Deconstructor
-         ~App() { printf("Quiting SDL"); SDL_Quit(); }
+         ~App() { printf("Quiting SDL\n"); SDL_Quit(); }
 
          // Constructor
          App(Uint32 flags, const char* name = "demo", int w = 1280, int h = 800) {
@@ -87,7 +87,6 @@ namespace graphics {
              }
          }
 
-         // Overload functions
          virtual void onDraw() {}
 
      };    // class App
