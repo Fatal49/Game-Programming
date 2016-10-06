@@ -1,48 +1,46 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-//  --- sdl_events.hpp ---
-//
-//   Events class to handle all events sent o SDL
-//
-//////////////////////////////////////////////////////////////////////////////
+#ifndef __SDL_EVENTS_CPP__
+#define __SDL_EVENTS_CPP__
 
-//----------------------------------------------------------------------------
-//
-// --- Include system headers ---
-//
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <stdio.h>
 #include "sdl_window.hpp"
 
-namespace graphics {
+typedef struct {
+    bool exit = false;
+    bool up = false;
+    bool down = false;
+    bool right = false;
+    bool left = false;
+    bool space = false;
+    SDL_Scancode sc;
+} eventParse;
 
-    /*-----------------------------------------------------------------------------
-     * Wrapper for SDL Events
-     *-----------------------------------------------------------------------------*/
-     class Event {
-     private:
+//
+// -- Wrapper for SDL Events --
+//
+template<typename Object> class Event {
+private:
 
-         // Member variables
-         SDL_Event current;
+    // Pointer to an object
+    Object* __ptr2Object;
 
-     public:
+    // The next event to be handled
+    SDL_Event event;
 
-         // Default Constructor
-         Event() {}
+public:
 
-         // Attempt to get the next event in the queue
-         int getEvent() { return SDL_PollEvent(&current); }
+    // Constructor
+    Event(Object* ptr2Object) :__ptr2Object(ptr2Object) {}
 
-         // Handle the event
-         void handleEvent() {             
+    // Attempt to get the next event in the queue
+    int getEvent() { return SDL_PollEvent(&event); }
 
+    // Handle the next event
+    // Any functor passed to handleEvent must have a
+    // () operator overload taking a SDL_Event structure
+    // as its argument
+    eventParse handleEvent() {
+        return (*__ptr2Object)(event);
+    }
 
-         }
+};
 
-
-
-     };   // class Events
-
-}   // namespace graphics
+#endif /* __SDL_EVENTS_CPP__ defiend */
