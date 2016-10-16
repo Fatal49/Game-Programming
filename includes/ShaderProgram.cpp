@@ -29,6 +29,8 @@ ShaderProgram::ShaderProgram(const char *vertexShaderFile, const char *fragmentS
 
 }
 
+ShaderProgram::~ShaderProgram() {}
+
 GLuint ShaderProgram::loadShaderFromFile(const std::string &shaderFile, GLenum type) {
     //Open a file stream with the file name
     std::ifstream infile(shaderFile);
