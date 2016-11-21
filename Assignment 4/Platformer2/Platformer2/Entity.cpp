@@ -1,7 +1,7 @@
 #include "Entity.hpp"
 #include "SpriteSheet.hpp"
 
-Entity::Entity() {}
+Entity::Entity() { gravity.y = -GRAVITY; }
 
 Entity::~Entity() {
     if (!sprite)
@@ -11,7 +11,8 @@ Entity::~Entity() {
 Entity::Entity(const Entity& rhs) : position(rhs.position), width(rhs.width), height(rhs.height),
 velocity(rhs.velocity), acceleration(rhs.acceleration), isStatic(rhs.isStatic),
 entityType(rhs.entityType), collidedTop(rhs.collidedTop), collidedLeft(rhs.collidedLeft),
-collidedRight(rhs.collidedRight), collidedBottom(rhs.collidedBottom) {
+collidedRight(rhs.collidedRight), collidedBottom(rhs.collidedBottom), view(rhs.view),
+gravity(rhs.gravity) {
     if (sprite)
         delete sprite;
     sprite = new Sprite(*(rhs.sprite));
@@ -38,10 +39,10 @@ void Entity::update(float elapsed) {
         translate(deltaPosition.x, deltaPosition.y);
         updateCollBox(position);
         
-        printf("pos: (%f, %f)\nbox: (%f, %f)\n\n", position.x, position.y, box.center.x, box.center.y);
+        // printf("pos: (%f, %f)\nbox: (%f, %f)\n\n", position.x, position.y, box.center.x, box.center.y);
         
         // Check for and resolve collisions with the wall
-        collidesWithWall(elapsed);
+        // collidesWithWall(elapsed);
     }
 }
 
@@ -129,9 +130,15 @@ void Entity::resolveCollision(AABB other) {
     }
 }
 
+void Entity::setPosition(float _x, float _y) { translate(_x, _y); }
+
 void Entity::translate(float _x, float _y) {
     position.x += _x;  position.y += _y;        // Update entites position
     sprite->model.Translate(_x, _y, 0.0f);      // Translate the entity
+}
+
+void Entity::scale(float _x, float _y) {
+    sprite->model.Scale(_x, _y, 0.0f);
 }
 
 void Entity::setUpCollBox() {

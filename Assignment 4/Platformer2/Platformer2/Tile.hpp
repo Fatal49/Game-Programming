@@ -40,10 +40,10 @@ public:
     Matrix projection;
     
     // Methods
-    void init(std::vector<std::vector<unsigned char>>& levelData);
+    void setMap(std::vector<std::vector<unsigned char>>& levelData);
     void readInLevel(const char* fn,
                      std::vector<std::vector<unsigned char>>& levelData,
-                     std::vector<entityTile>& entities);
+                     std::vector<Entity*>& entities);
     void draw(Shader* program);
 
 private:
@@ -68,9 +68,11 @@ private:
         std::vector<float> texCoordData;
     
         // Methods
-    void readMapData(std::ifstream& ipf,
-                     std::vector<std::vector<unsigned char>>& grid);
-    void readEntitiesData(std::ifstream& ipf, std::vector<entityTile>& entities);
+        void readMapData(std::ifstream& ipf,
+                         std::vector<std::vector<unsigned char>>& grid);
+        void readEntitiesData(std::ifstream& ipf, std::vector<Entity*>& entities);
+        void placeEntity(const std::string& type, float placeX, float placeY,
+                         std::vector<Entity*>& entities);
 };
 
 

@@ -5,7 +5,6 @@ Platformer::Platformer(float w, float h, const char* name): Game(w, h, name) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
         printf("SDL window is created\n");
-        init();
     }
 }
 
@@ -14,7 +13,6 @@ Platformer::Platformer(const char* name) : Game(name) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
         printf("SDL window is created\n");
-        init();
     }
 }
 
@@ -24,22 +22,14 @@ Platformer::~Platformer() {
         delete shader;
     }
     
-    if (ts)
-        delete ts;
-    
     if (t)
         delete t;
     
+    if (!entities.empty())
+        for (size_t i = 0; i < entities.size(); i++)
+            delete entities[i];
+    
     SDL_Quit();
-}
-
-void Platformer::init() {
-    // Static entities
-    for (int i = 0; i < 277; i++) {
-        if (i == 39 || i == 85 || i == 129 || i == 134 || i == 141 || i == 161)
-            continue;
-        staticEntities.push_back(i);
-    }
 }
 
 GLuint Platformer::LoadTexture(const char *image_path) {
@@ -90,19 +80,6 @@ bool Platformer::processEvents() {
     return true;
 }
 
-int Platformer::findEntity(int n) const {
-    for (int i = 0; i < tiles.size(); i++)
-        if (tiles[i].num == n)
-            return i;
-    
-    return -1;
-}
-
-void Platformer::setStaticEntities() {
-    for (int i = 0; i < staticEntities.size(); i++)
-        tiles[staticEntities[i]].e.isStatic = true;
-}
-
 void Platformer::setup() {
     // Set the viewport
     setViewPort();
@@ -122,39 +99,51 @@ void Platformer::setup() {
     shader->setProjectionMatrix(projection);
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
     
+    // Create the level
     textureID = LoadTexture("sprites/dirt-tiles.png");
-    t = new Tiles(0.04f, 24, 16, 95, 20, textureID);
-    t->readInLevel("sprites/level2.txt", map, entities);
-    t->init(map);
+    t = new Tiles(DRAW_SIZE, 24, 16, 128, 128, textureID);
+    t->readInLevel("sprites/level.txt", map, entities);
+    t->setMap(map);
     
-    projection.Translate(0.0f, -245.0f, 0.0f);
-//    model.Translate(-34.0f, -20.0f, 0.0f);
-//    view.Scale(9.5f, 9.5f, 1.0f);
-    shader->setProjectionMatrix(projection);
-    // (1.0f / 24.0f) * (1.0f / 16.0f)
+    // Set the sprites for each entity
+    entities[0]->sprite = new Sprite(textureID, (18.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+                                                (1.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
+                                                TILE_WIDTH / SPRITE_SHEET_WIDTH,
+                                                TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
+                                                DRAW_SIZE);
+    entities[1]->sprite = new Sprite(textureID, (7.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+                                                (6.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
+                                                TILE_WIDTH / SPRITE_SHEET_WIDTH,
+                                                TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
+                                                DRAW_SIZE);
+    entities[2]->sprite = new Sprite(textureID, (7.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+                                                (6.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
+                                                TILE_WIDTH / SPRITE_SHEET_WIDTH,
+                                                TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
+                                                DRAW_SIZE);
     
-//    SPRITE_COUNT_X = 24.0f;
-//    SPRITE_COUNT_Y = 16.0f;
-//    TILE_WIDTH = 1.0f / SPRITE_COUNT_X;
-//    TILE_HEIGHT = 1.0f / SPRITE_COUNT_Y;
-//    
-//    ts = new TileSheet("sprites/dirt-tiles.png", 384.0f, 256.0f, 16.0f, 16.0f, 16, 24, 0.04f);
-//    ts->loadTiles(tiles);
-//    ts->getTileIndex("sprites/dirt-tiles_map.csv", tiles);
-//    ts->buildMap("sprites/level.txt", map, tiles, entities);
-//    
-//    setStaticEntities();
     
-//    for (int y = 0; y < map.size(); y++) {
-//        for (int x = 0; x < map[0].size(); x++) {
-//        }
-//    }
+
+    // Setup the entities
+    entities[0]->setPosition(entities[0]->position.x, entities[0]->position.y);
+    entities[0]->sprite->view = entities[0]->view;
+ 
+    entities[1]->setPosition(entities[1]->position.x, entities[1]->position.y);
+    entities[1]->sprite->view = entities[1]->view;
+    entities[1]->translate(0.009f, -0.0128f);
+    entities[1]->scale(1.85f, 1.0f);
+    
+    entities[2]->setPosition(entities[2]->position.x, entities[2]->position.y);
+    entities[2]->sprite->view = entities[2]->view;
+    entities[2]->translate(0.009f, -0.0128f);
+    entities[2]->scale(1.85f, 1.0f);
+    
 }
 
 void Platformer::render() {
     // Set the color for the viewport
     // glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(122.0f / 256.0f, 224.0f / 256.0f, 241.0f / 255.0f, 1.0f);
     
     // Clear the buffer with preset values
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -167,25 +156,10 @@ void Platformer::render() {
 }
 
 void Platformer::draw() {
-//    for (size_t y = 0; y < map.size(); y++) {
-//        for (size_t x = 0; x < map[0].size(); x++) {
-//            if (map[y][x] != 0) {
-//                printf("I am being drawn -> %u\n", map[y][x]);
-//                t->draw(shader, map[y][x]);
-//            }
-//        }
-//    }
     t->draw(shader);
-    
-//    for (size_t y = 0; y < 2; y++) {
-//        for (size_t x = 0; x < 2; x++) {
-//            if (map[y][x] != 1000) {
-//                vec::vec2 pos = vec::vec2(-1 + (x * TILE_WIDTH), 1 - (y * TILE_HEIGHT));
-//                tiles[map[y][x]].e.position = pos;
-//                tiles[map[y][x]].e.render(shader);
-//            }
-//        }
-//    }
+    entities[0]->render(shader);
+    entities[1]->render(shader);
+    entities[2]->render(shader);
 }
 
 void Platformer::update() {
@@ -203,10 +177,9 @@ void Platformer::update() {
     
     while (fixedElapsed >= FIXED_TIMESTEP ) {
         fixedElapsed -= FIXED_TIMESTEP;
-//        tiles[DRAW_E].e.update(FIXED_TIMESTEP);
     }
     
-//    tiles[DRAW_E].e.update(fixedElapsed);
+
     
     // Handle input
     SDL_Event e;
@@ -216,7 +189,7 @@ void Platformer::update() {
             switch (e.key.keysym.scancode) {
                 case SDL_SCANCODE_RIGHT:
                     printf("The right key was pressed       :)\n");
-//                    tiles[DRAW_E].e.moveRight(fixedElapsed);
+
                     break;
                 default:
                     break;
@@ -226,7 +199,7 @@ void Platformer::update() {
         case SDL_KEYUP:
             switch (e.key.keysym.scancode) {
                 case SDL_SCANCODE_SPACE:
-//                    tiles[DRAW_E].e.jump(fixedElapsed);
+
                     break;
                 default:
                     break;

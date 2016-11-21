@@ -4,7 +4,7 @@ Tiles::Tiles(float ts, int sc_x, int sc_y, int lw, int lh, GLuint tID)
 : TILE_SIZE(ts), SPRITE_COUNT_X(sc_x), SPRITE_COUNT_Y(sc_y), LEVEL_WIDTH(lw), LEVEL_HEIGHT(lh),
 textureID(tID) {}
 
-void Tiles::init(std::vector<std::vector<unsigned char>>& levelData) {  
+void Tiles::setMap(std::vector<std::vector<unsigned char>>& levelData) {
     for(int y = 0; y < LEVEL_HEIGHT; y++) {
         for(int x = 0; x < LEVEL_WIDTH; x++) {
             
@@ -17,11 +17,11 @@ void Tiles::init(std::vector<std::vector<unsigned char>>& levelData) {
                 
                 vertexData.insert(vertexData.end(), {
                     TILE_SIZE * x, -TILE_SIZE * y,
-                    TILE_SIZE * x, (-TILE_SIZE * y) - TILE_SIZE,
-                    (TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
+                    TILE_SIZE * x, (-TILE_SIZE * y)-TILE_SIZE,
+                    (TILE_SIZE * x)+TILE_SIZE, (-TILE_SIZE * y)-TILE_SIZE,
                     TILE_SIZE * x, -TILE_SIZE * y,
-                    (TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
-                    (TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
+                    (TILE_SIZE * x)+TILE_SIZE, (-TILE_SIZE * y)-TILE_SIZE,
+                    (TILE_SIZE * x)+TILE_SIZE, -TILE_SIZE * y
                 });
                 
                 texCoordData.insert(texCoordData.end(), {
@@ -39,7 +39,9 @@ void Tiles::init(std::vector<std::vector<unsigned char>>& levelData) {
 
 void Tiles::readInLevel(const char* fn,
                         std::vector<std::vector<unsigned char>>& levelData,
-                        std::vector<entityTile>& entities) {
+                        std::vector<Entity*>& entities) {
+    view.Translate(-1.0f, 2.1f, 0.0f);
+    
     // Open the file
     std::ifstream ipf(fn);
     
@@ -101,38 +103,60 @@ void Tiles::readMapData(std::ifstream& ipf,
     }
 }
 
-void Tiles::readEntitiesData(std::ifstream& ipf, std::vector<entityTile>& entities) {
+void Tiles::readEntitiesData(std::ifstream& ipf, std::vector<Entity*>& entities) {
     std::string line;
-    unsigned short x = 0, y = 0, num = 0;
+    int x = 0, y = 0;
     
-    // Get to the entities location
+    // Get to the entities type
     while (getline(ipf, line)) {
         if (line.size() > 8) {
-            if (line.substr(0, 8) == "location")
+            if (line.substr(0, 4) == "type")
                 break;
         }
     }
     
+    // Get entity type and go to the next line
+    std::string type = line.substr(5, line.size() - 5);
+    getline(ipf, line);
+    
     // Get x position
     size_t start = line.find("=", 0);
     std::string temp = line.substr(start + 1, line.find(",", start) - start - 1);
-    x = (unsigned short)atoi(temp.c_str());
+    x = atoi(temp.c_str());
     
     // Get y position
     start = line.find(",", start);
     temp = line.substr(start + 1, line.find(",", start) - start - 1);
-    y = (unsigned short)atoi(temp.c_str());
+    y = atoi(temp.c_str()) - 1.0f;
     
-    // Get index
-    getline(ipf, line);
-    start = line.find("=", 0);
-    temp = line.substr(start + 1, line.size() - start);
-    num = (unsigned short)atoi(temp.c_str());
+    // Create and place the entity
+    placeEntity(type, (float)x, (float)y, entities);
     
-    // Add the data to entities
-    entities.push_back(entityTile(vec::vec2(x, y), num));
 }
 
+void Tiles::placeEntity(const std::string& type, float placeX, float placeY,
+                        std::vector<Entity*>& entities) {
+    EntityType et;
+    Entity* e;
+    
+    // Get type
+    if (type == "ENTITY_PLAYER")
+        et = ENTITY_PLAYER;
+    else if (type == "ENTITY_ENEMY")
+        et = ENTITY_ENEMY;
+    else if (type == "ENTITY_COIN")
+        et = ENTITY_COIN;
+    
+    // Create entity
+    e = new Entity();
+    e->gridPos = vec::vec2(placeX, placeY);
+    e->position = vec::vec2(placeX * TILE_SIZE, placeY * -TILE_SIZE);
+    e->view = view;
+    e->entityType = et;
+    
+    // Place entity in container
+    entities.push_back(e);
+}
 
 void Tiles::draw(Shader* program) {
     glBindTexture(GL_TEXTURE_2D, textureID);

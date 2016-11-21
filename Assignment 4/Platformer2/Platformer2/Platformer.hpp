@@ -12,6 +12,11 @@
 #define MAX_TIMESTEPS 6
 #define LEVEL_WIDTH 24
 #define LEVEL_HEIGHT 16
+#define TILE_WIDTH 16.0f
+#define TILE_HEIGHT 16.0f
+#define SPRITE_SHEET_WIDTH 384.0f
+#define SPRITE_SHEET_HEIGHT 256.0f
+#define DRAW_SIZE 0.025f
 
 class Platformer : public Game {
 public:
@@ -35,9 +40,7 @@ private:
     // Methods
     void init();
     GLuint LoadTexture(const char *image_path);
-    int findEntity(int n) const;
     void setStaticEntities();
-    // void drawMap();
     
     // For animations
     float lastFrameTicks = 0.0f;
@@ -46,35 +49,19 @@ private:
     
     // Data
     
-    int DRAW_E = 0;
-    
         // Shader
-    Shader* shader = nullptr;
+        Shader* shader = nullptr;
     
         // Matrices
-    Matrix model, view, projection;
+        Matrix model, view, projection;
     
         // Tile
-    Tiles* t = nullptr;
-    GLuint textureID;
+        Tiles* t = nullptr;
+        GLuint textureID;
     
-        // TileSheet
-    TileSheet* ts = nullptr;
-    
-    // Tile info
-        float TILE_WIDTH;
-        float TILE_HEIGHT;
-        float SPRITE_COUNT_X;
-        float SPRITE_COUNT_Y;
-    
-        // Entities
-    std::vector<tile> tiles;
-    std::vector<entityTile> entities;
-    std::vector<std::vector<unsigned char>> map;
-    unsigned char levelData[LEVEL_HEIGHT][LEVEL_WIDTH];
-    
-        // Map info
-    std::vector<unsigned short> staticEntities;
+        // Containers
+        std::vector<Entity*> entities;
+        std::vector<std::vector<unsigned char>> map;
 };
 
 
