@@ -111,32 +111,26 @@ void Platformer::setup() {
                                                 TILE_WIDTH / SPRITE_SHEET_WIDTH,
                                                 TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
                                                 DRAW_SIZE);
-    entities[1]->sprite = new Sprite(textureID, (7.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+    entities[1]->sprite = new Sprite(textureID, (18.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+                                                (3.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
+                                                TILE_WIDTH / SPRITE_SHEET_WIDTH,
+                                                TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
+                                                DRAW_SIZE);
+    entities[2]->sprite = new Sprite(textureID, (0.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
                                                 (6.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
                                                 TILE_WIDTH / SPRITE_SHEET_WIDTH,
                                                 TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
                                                 DRAW_SIZE);
-    entities[2]->sprite = new Sprite(textureID, (7.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
-                                                (6.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
-                                                TILE_WIDTH / SPRITE_SHEET_WIDTH,
-                                                TILE_HEIGHT / SPRITE_SHEET_HEIGHT,
-                                                DRAW_SIZE);
-    
-    
 
     // Setup the entities
     entities[0]->setPosition(entities[0]->position.x, entities[0]->position.y);
     entities[0]->sprite->view = entities[0]->view;
- 
+    
     entities[1]->setPosition(entities[1]->position.x, entities[1]->position.y);
     entities[1]->sprite->view = entities[1]->view;
-    entities[1]->translate(0.009f, -0.0128f);
-    entities[1]->scale(1.85f, 1.0f);
     
     entities[2]->setPosition(entities[2]->position.x, entities[2]->position.y);
     entities[2]->sprite->view = entities[2]->view;
-    entities[2]->translate(0.009f, -0.0128f);
-    entities[2]->scale(1.85f, 1.0f);
     
 }
 
@@ -156,10 +150,13 @@ void Platformer::render() {
 }
 
 void Platformer::draw() {
+    // Draw the map
     t->draw(shader);
-    entities[0]->render(shader);
-    entities[1]->render(shader);
-    entities[2]->render(shader);
+    
+    // Draw the entities
+    for (size_t i = 0; i < entities.size(); i++)
+        entities[i]->render(shader);
+    
 }
 
 void Platformer::update() {
