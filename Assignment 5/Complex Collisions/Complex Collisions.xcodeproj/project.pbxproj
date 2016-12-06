@@ -16,6 +16,7 @@
 		5E7646151DF3EA4D0078A6F6 /* Matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E76460C1DF3EA4D0078A6F6 /* Matrix.cpp */; };
 		5E7646161DF3EA4D0078A6F6 /* Platformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E76460E1DF3EA4D0078A6F6 /* Platformer.cpp */; };
 		5E7646171DF3EA4D0078A6F6 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7646101DF3EA4D0078A6F6 /* Shader.cpp */; };
+		5E76461C1DF3F7B60078A6F6 /* Rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E76461A1DF3F7B60078A6F6 /* Rectangle.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,6 +49,10 @@
 		5E7646111DF3EA4D0078A6F6 /* Shader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
 		5E7646121DF3EA4D0078A6F6 /* vec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vec.h; sourceTree = "<group>"; };
 		5E7646131DF3EA4D0078A6F6 /* vertex_textured.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vertex_textured.glsl; sourceTree = "<group>"; };
+		5E76461A1DF3F7B60078A6F6 /* Rectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rectangle.cpp; sourceTree = "<group>"; };
+		5E76461B1DF3F7B60078A6F6 /* Rectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Rectangle.hpp; sourceTree = "<group>"; };
+		5E76461D1DF48D390078A6F6 /* fragment.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fragment.glsl; sourceTree = "<group>"; };
+		5E76461E1DF48D390078A6F6 /* vertex.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +98,8 @@
 				5E76460B1DF3EA4D0078A6F6 /* Game.hpp */,
 				5E76460E1DF3EA4D0078A6F6 /* Platformer.cpp */,
 				5E76460F1DF3EA4D0078A6F6 /* Platformer.hpp */,
+				5E76461A1DF3F7B60078A6F6 /* Rectangle.cpp */,
+				5E76461B1DF3F7B60078A6F6 /* Rectangle.hpp */,
 				5E7646101DF3EA4D0078A6F6 /* Shader.cpp */,
 				5E7646111DF3EA4D0078A6F6 /* Shader.hpp */,
 				5E7646191DF3EA770078A6F6 /* Containers */,
@@ -106,6 +113,8 @@
 			children = (
 				5E7646131DF3EA4D0078A6F6 /* vertex_textured.glsl */,
 				5E7646091DF3EA4D0078A6F6 /* fragment_textured.glsl */,
+				5E76461D1DF48D390078A6F6 /* fragment.glsl */,
+				5E76461E1DF48D390078A6F6 /* vertex.glsl */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
@@ -181,6 +190,7 @@
 				5E7646141DF3EA4D0078A6F6 /* Game.cpp in Sources */,
 				5E7646161DF3EA4D0078A6F6 /* Platformer.cpp in Sources */,
 				5E7646171DF3EA4D0078A6F6 /* Shader.cpp in Sources */,
+				5E76461C1DF3F7B60078A6F6 /* Rectangle.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

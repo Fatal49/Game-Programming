@@ -2,9 +2,9 @@
 #define __PLATFORMER_HPP__
 
 #include "Game.hpp"
-#include "vec.h"
-#include "Shader.hpp"
 #include "Matrix.hpp"
+#include "Rectangle.hpp"
+#include <time.h>
 #include <SDL2_image/SDL_image.h>
 
 #define FIXED_TIMESTEP 0.0166666f
@@ -31,7 +31,6 @@ private:
     
     // Methods
     void init();
-    GLuint LoadTexture(const char *image_path);
 
     // For animations
     float lastFrameTicks = 0.0f;
@@ -48,6 +47,12 @@ private:
     
         // Texture ID's
         GLuint tex1;
+    
+        // Objects
+        Rectangle* rec1 = nullptr;
+        Rectangle* rec2 = nullptr;
+    
+    
 };
 
 #endif /* __PLATFORMER_HPP__ defined */

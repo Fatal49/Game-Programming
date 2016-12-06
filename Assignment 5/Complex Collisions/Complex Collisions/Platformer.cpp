@@ -21,25 +21,14 @@ Platformer::~Platformer() {
         printf("Freeing shader\n");
         delete shader;
     }
+    
+    if (rec1)
+        delete rec1;
+    
+    if (rec2)
+        delete rec2;
       
     SDL_Quit();
-}
-
-GLuint Platformer::LoadTexture(const char *image_path) {
-    SDL_Surface *surface = IMG_Load(image_path);
-    GLuint textureID;
-    
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_BGRA,
-                 GL_UNSIGNED_BYTE, surface->pixels);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    
-    SDL_FreeSurface(surface);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return textureID;
 }
 
 bool Platformer::processEvents() {
@@ -82,21 +71,34 @@ void Platformer::setup() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glLineWidth(5.0f);
     
     // Load, compile & link the shaders
-    shader = new Shader("vertex_textured.glsl", "fragment_textured.glsl");
+    shader = new Shader("vertex.glsl", "fragment.glsl");
     
     // Set matrices & orthographic projection
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
     shader->setModelMatrix(model);
     shader->setViewMatrix(view);
     shader->setProjectionMatrix(projection);
+    
+    // Set position of first rectangle
+    rec1 = new Rectangle(0.25f, 0.5f);
+    rec1->create();
+    rec1->translate(-2.0f, 0.5f);
+    rec1->scale(1.5f, 1.5f);
+    rec1->setVelocity(vec::vec2(0.3f, -0.1f));
+    
+    // Set position of second rectangle
+    rec2 = new Rectangle(0.5f, 0.5f);
+    rec2->create();
+    rec2->translate(2.0f, -0.5f);
+    rec2->scale(1.5f, 1.5f);
 }
 
 void Platformer::render() {
     // Set the color for the viewport
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);       // Light black color
-//    glClearColor(122.0f / 256.0f, 224.0f / 256.0f, 241.0f / 255.0f, 1.0f);    // Light blue
     
     // Clear the buffer with preset values
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,7 +111,8 @@ void Platformer::render() {
 }
 
 void Platformer::draw() {
-
+    rec1->draw(shader);
+    rec2->draw(shader);
 }
 
 void Platformer::update() {
@@ -127,8 +130,36 @@ void Platformer::update() {
     
     while (fixedElapsed >= FIXED_TIMESTEP ) {
         fixedElapsed -= FIXED_TIMESTEP;
+        
+        // rec2->rotate(FIXED_TIMESTEP);
+        rec1->update(FIXED_TIMESTEP);
+        rec1->debug();
+
+//        if (rec1->checkCollision(rec2->getPoints())) {
+//            printf("There Colliding  :)\n");
+//        }
+        
+//        std::vector<vec::vec2> points = rec1->getPoints();
+//        printf("\nTop Left: (%f, %f)\n", points[0].x, points[0].y);
+//        printf("Top Right: (%f, %f)\n", points[1].x, points[1].y);
+//        printf("Bottom Left: (%f, %f)\n", points[2].x, points[2].y);
+//        printf("Bottom Right: (%f, %f)\n\n", points[3].x, points[3].y);
+        
     }
     
+    // rec2->rotate(sinf(fixedElapsed));
+    rec1->update(fixedElapsed);
+    rec1->debug();
+    
+//    if (rec1->checkCollision(rec2->getPoints())) {
+//        printf("There Colliding  :)\n");
+//    }
+    
+//    std::vector<vec::vec2> points = rec1->getPoints();
+//    printf("\nTop Left: (%f, %f)\n", points[0].x, points[0].y);
+//    printf("Top Right: (%f, %f)\n", points[1].x, points[1].y);
+//    printf("Bottom Left: (%f, %f)\n", points[2].x, points[2].y);
+//    printf("Bottom Right: (%f, %f)\n\n", points[3].x, points[3].y);
 
     
     // Handle input
@@ -161,8 +192,6 @@ void Platformer::update() {
     }
     
 }
-
-
 
 
 
