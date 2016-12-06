@@ -1,13 +1,10 @@
 
 #include "Rectangle.hpp"
 
-Rectangle::Rectangle(float w, float h) : width(w), height(h) {
-    basis[0][0] = 1.0f;     basis[0][1] = 0.0f;
-    basis[1][0] = 0.0f;     basis[1][1] = 1.0f;
-}
+Rectangle::Rectangle(float w, float h) : width(w), height(h) {}
 
 Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height),
-    position(rhs.position), model(rhs.model)
+    position(rhs.position), model(rhs.model), scaling(rhs.scaling), rotating(rhs.rotating)
 {
     try {
         // Get the vertices
@@ -17,6 +14,10 @@ Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height)
         // Get the colors
         for (int i = 1; i < 16; i++)
             color[i] = rhs.color[i];
+        
+        // Get the points
+        for (int i = 0; i < rhs.points.size(); i++)
+            points[i] = rhs.points[i];
         
     } catch (...) {
         printf("Rectangle(const rhs& Reactangle): error\n");
@@ -82,6 +83,7 @@ void Rectangle::create() {
     color[18] = 0.0f;
     color[19] = 1.0f;
     
+    // Set the points of the each vertex
     points.insert(points.end(), {
         vec::vec2(vertices[0], vertices[1]),    // Top Left
         vec::vec2(vertices[2], vertices[3]),    // Top Right
@@ -96,11 +98,6 @@ void Rectangle::debug() {
     vert.clear();
     i.clear();
     c.clear();
-    
-    printf("\nTop Left: (%f, %f)\n", myPoints[0].x, myPoints[0].y);
-    printf("Top Right: (%f, %f)\n", myPoints[1].x, myPoints[1].y);
-    printf("Bottom Left: (%f, %f)\n", myPoints[2].x, myPoints[2].y);
-    printf("Bottom Right: (%f, %f)\n\n", myPoints[3].x, myPoints[3].y);
     
     vert.insert(vert.end(), {
         myPoints[0].x, myPoints[0].y,       // Top Left
@@ -168,14 +165,10 @@ void Rectangle::update(float elapsed) {
 }
 
 void Rectangle::translate(float x, float y) {
-    position.x += x;
-    position.y += y;
+    position.x = model.m[3][0];
+    position.y = model.m[3][1];
     
     model.Translate(x, y, 0.0f);
-    printf("(%f, %f)\n", x, y);
-    
-    translating.m[0][3] += model.m[3][0];
-    translating.m[1][3] += model.m[3][1];
 }
 
 void Rectangle::scale(float x, float y) {
@@ -199,8 +192,8 @@ void Rectangle::setVelocity(vec::vec2 v) { velocity = v; }
 const std::vector<vec::vec2> Rectangle::getPoints() {
     std::vector<vec::vec2> p;
     Matrix temp;
-    temp.m[0][3] = position.x;
-    temp.m[1][3] = position.y;
+    temp.m[0][3] = model.m[3][0];
+    temp.m[1][3] = model.m[3][1];
     
     Matrix all = temp * scaling * rotating;
     
@@ -218,8 +211,6 @@ bool Rectangle::checkCollision(const std::vector<vec::vec2> points) {
     
     return testSATSeparationForEdge(myPoints[3].x - myPoints[1].x, myPoints[3].y - myPoints[1].y,
                                    myPoints, points);
-    
-//    return checkSATCollision(myPoints, points);
 }
 
 const std::vector<vec::vec2> Rectangle::getEdges() {
@@ -268,7 +259,6 @@ bool Rectangle::testSATSeparationForEdge(float edgeX, float edgeY,
     float e2Center = e2Min + (e2Width/2.0);
     float dist = fabs(e1Center-e2Center);
     float p = dist - ((e1Width+e2Width)/2.0);
-    printf("p -> %f\n\n", p);
     
     if(p < 0) {
         return true;

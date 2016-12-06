@@ -131,36 +131,30 @@ void Platformer::update() {
     while (fixedElapsed >= FIXED_TIMESTEP ) {
         fixedElapsed -= FIXED_TIMESTEP;
         
-        // rec2->rotate(FIXED_TIMESTEP);
-        rec1->update(FIXED_TIMESTEP);
-        rec1->debug();
-
-//        if (rec1->checkCollision(rec2->getPoints())) {
-//            printf("There Colliding  :)\n");
-//        }
-        
-//        std::vector<vec::vec2> points = rec1->getPoints();
-//        printf("\nTop Left: (%f, %f)\n", points[0].x, points[0].y);
-//        printf("Top Right: (%f, %f)\n", points[1].x, points[1].y);
-//        printf("Bottom Left: (%f, %f)\n", points[2].x, points[2].y);
-//        printf("Bottom Right: (%f, %f)\n\n", points[3].x, points[3].y);
-        
+        if (!pause) {            
+            rec2->rotate(sinf(FIXED_TIMESTEP));
+            
+            rec1->update(FIXED_TIMESTEP);
+            rec2->update(FIXED_TIMESTEP);
+            
+            if (rec1->checkCollision(rec2->getPoints())) {
+                rec1->setVelocity(vec::vec2(-0.3f, -0.1f));
+                printf("There Colliding  1 :)\n");
+            }
+        }
     }
     
-    // rec2->rotate(sinf(fixedElapsed));
-    rec1->update(fixedElapsed);
-    rec1->debug();
-    
-//    if (rec1->checkCollision(rec2->getPoints())) {
-//        printf("There Colliding  :)\n");
-//    }
-    
-//    std::vector<vec::vec2> points = rec1->getPoints();
-//    printf("\nTop Left: (%f, %f)\n", points[0].x, points[0].y);
-//    printf("Top Right: (%f, %f)\n", points[1].x, points[1].y);
-//    printf("Bottom Left: (%f, %f)\n", points[2].x, points[2].y);
-//    printf("Bottom Right: (%f, %f)\n\n", points[3].x, points[3].y);
-
+    if (!pause) {
+        rec2->rotate(sinf(fixedElapsed));
+        
+        rec1->update(fixedElapsed);
+        rec2->update(fixedElapsed);
+        
+        if (rec1->checkCollision(rec2->getPoints())) {
+            rec1->setVelocity(vec::vec2(-0.3f, -0.1f));
+            printf("There Colliding  2 :)\n");
+        }
+    }
     
     // Handle input
     SDL_Event e;
@@ -180,7 +174,10 @@ void Platformer::update() {
         case SDL_KEYUP:
             switch (e.key.keysym.scancode) {
                 case SDL_SCANCODE_SPACE:
-
+                    if (pause)
+                        pause = false;
+                    else
+                        pause = true;
                     break;
                 default:
                     break;

@@ -49,20 +49,10 @@ private:
     float width;
     float height;
     
-    // OpenGL info
-    GLuint vertexBuffer;
-    GLuint indexBuffer;
-    
     // Data
-    union {
-        GLfloat basis[2][2];
-        GLfloat basisl[4];
-    };
     Matrix model;
-    Matrix translating;
     Matrix scaling;
     Matrix rotating;
-    float totalX;
     
     // Object info
     GLfloat vertices[10];
@@ -73,6 +63,11 @@ private:
     // Physics info
     vec::vec2 position;
     vec::vec2 velocity;
+    
+    // Flags
+    
+    
+    
 };
 
 #endif /* __RECTANGLE_HPP__ defined */

@@ -37,6 +37,9 @@ private:
     float angle = 0.0f;
     float elapsed = 0.0f;
     
+    // Flags
+    bool pause = false;
+    
     // Data
     
         // Shader
