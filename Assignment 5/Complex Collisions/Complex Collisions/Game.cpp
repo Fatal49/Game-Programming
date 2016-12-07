@@ -16,7 +16,7 @@ void Game::gameLoop() {
     if (window) {
         setup();
         while(processEvents()) {
-            update();
+            update();            
             render();
         }
     } else {

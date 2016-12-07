@@ -23,6 +23,7 @@ public:
     bool processEvents();
     void update();
     void render();
+    void checkCollisions();
     
     // Methods
     void draw();
@@ -31,10 +32,14 @@ private:
     
     // Methods
     void init();
+    bool testSATSeparationForEdge(float edgeX, float edgeY,
+                                  const std::vector<vec::vec2> &points1,
+                                  const std::vector<vec::vec2> &points2);
+    bool checkSATCollision(const std::vector<vec::vec2> &e1Points,
+                           const std::vector<vec::vec2> &e2Points);
 
     // For animations
     float lastFrameTicks = 0.0f;
-    float angle = 0.0f;
     float elapsed = 0.0f;
     
     // Flags
@@ -54,8 +59,7 @@ private:
         // Objects
         Rectangle* rec1 = nullptr;
         Rectangle* rec2 = nullptr;
-    
-    
+        Rectangle* rec3 = nullptr;    
 };
 
 #endif /* __PLATFORMER_HPP__ defined */

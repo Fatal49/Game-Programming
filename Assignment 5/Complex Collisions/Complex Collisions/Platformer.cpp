@@ -27,6 +27,9 @@ Platformer::~Platformer() {
     
     if (rec2)
         delete rec2;
+    
+    if (rec3)
+        delete rec3;
       
     SDL_Quit();
 }
@@ -71,7 +74,6 @@ void Platformer::setup() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glLineWidth(5.0f);
     
     // Load, compile & link the shaders
     shader = new Shader("vertex.glsl", "fragment.glsl");
@@ -87,13 +89,20 @@ void Platformer::setup() {
     rec1->create();
     rec1->translate(-2.0f, 0.5f);
     rec1->scale(1.5f, 1.5f);
-    rec1->setVelocity(vec::vec2(0.3f, -0.1f));
+    rec1->velocity = vec::vec2(0.5f, -0.1f);
     
     // Set position of second rectangle
     rec2 = new Rectangle(0.5f, 0.5f);
     rec2->create();
     rec2->translate(2.0f, -0.5f);
     rec2->scale(1.5f, 1.5f);
+    
+    // Set position of third rectangle
+    rec3 = new Rectangle(0.8f, 0.6f);
+    rec3->create();
+    rec3->translate(0.0f, 1.5f);
+    rec3->scale(1.1f, 1.1f);
+    rec3->velocity = vec::vec2(0.0f, -0.13f);
 }
 
 void Platformer::render() {
@@ -113,6 +122,7 @@ void Platformer::render() {
 void Platformer::draw() {
     rec1->draw(shader);
     rec2->draw(shader);
+    rec3->draw(shader);
 }
 
 void Platformer::update() {
@@ -120,7 +130,6 @@ void Platformer::update() {
     float ticks = (float) SDL_GetTicks() / 1000.0f;
     elapsed = ticks - lastFrameTicks;
     lastFrameTicks = ticks;
-    angle += elapsed;
     float fixedElapsed = elapsed;
     
     // Update every 60th of a second
@@ -131,29 +140,25 @@ void Platformer::update() {
     while (fixedElapsed >= FIXED_TIMESTEP ) {
         fixedElapsed -= FIXED_TIMESTEP;
         
-        if (!pause) {            
-            rec2->rotate(sinf(FIXED_TIMESTEP));
-            
+        if (!pause) {
             rec1->update(FIXED_TIMESTEP);
             rec2->update(FIXED_TIMESTEP);
+            rec3->update(FIXED_TIMESTEP);
             
-            if (rec1->checkCollision(rec2->getPoints())) {
-                rec1->setVelocity(vec::vec2(-0.3f, -0.1f));
-                printf("There Colliding  1 :)\n");
-            }
+            rec2->rotate(sinf(FIXED_TIMESTEP));
+            
+            checkCollisions();
         }
     }
     
     if (!pause) {
-        rec2->rotate(sinf(fixedElapsed));
-        
         rec1->update(fixedElapsed);
         rec2->update(fixedElapsed);
+        rec3->update(fixedElapsed);
         
-        if (rec1->checkCollision(rec2->getPoints())) {
-            rec1->setVelocity(vec::vec2(-0.3f, -0.1f));
-            printf("There Colliding  2 :)\n");
-        }
+        rec2->rotate(sinf(fixedElapsed));
+        
+        checkCollisions();
     }
     
     // Handle input
@@ -187,9 +192,99 @@ void Platformer::update() {
         default:
             break;
     }
+}
+
+void Platformer::checkCollisions() {
+    std::vector<vec::vec2> rec1Points = rec1->getPoints();
+    std::vector<vec::vec2> rec2Points = rec2->getPoints();
+    std::vector<vec::vec2> rec3Points = rec3->getPoints();
     
+    if (checkSATCollision(rec1Points, rec2Points)) {
+        rec1->velocity *= -1;
+    }
+
+    if (checkSATCollision(rec2Points, rec3Points)) {
+        rec2->velocity *= -1;
+    }
+    
+    if (checkSATCollision(rec1Points, rec3Points)) {
+        rec1->velocity *= -1;
+    }
 }
 
 
+bool Platformer::testSATSeparationForEdge(float edgeX, float edgeY,
+                                         const std::vector<vec::vec2> &points1,
+                                         const std::vector<vec::vec2> &points2) {
+    float normalX = -edgeY;
+    float normalY = edgeX;
+    float len = sqrtf(normalX*normalX + normalY*normalY);
+    normalX /= len;
+    normalY /= len;
+    
+    std::vector<float> e1Projected;
+    std::vector<float> e2Projected;
+    
+    for(int i=0; i < points1.size(); i++) {
+        e1Projected.push_back(points1[i].x * normalX + points1[i].y * normalY);
+    }
+    for(int i=0; i < points2.size(); i++) {
+        e2Projected.push_back(points2[i].x * normalX + points2[i].y * normalY);
+    }
+    
+    std::sort(e1Projected.begin(), e1Projected.end());
+    std::sort(e2Projected.begin(), e2Projected.end());
+    
+    float e1Min = e1Projected[0];
+    float e1Max = e1Projected[e1Projected.size()-1];
+    float e2Min = e2Projected[0];
+    float e2Max = e2Projected[e2Projected.size()-1];
+    float e1Width = fabs(e1Max-e1Min);
+    float e2Width = fabs(e2Max-e2Min);
+    float e1Center = e1Min + (e1Width/2.0);
+    float e2Center = e2Min + (e2Width/2.0);
+    float dist = fabs(e1Center-e2Center);
+    float p = dist - ((e1Width+e2Width)/2.0);
+    
+    if(p < 0) {
+        return true;
+    }
+    return false;
+}
 
+bool Platformer::checkSATCollision(const std::vector<vec::vec2> &e1Points,
+                                  const std::vector<vec::vec2> &e2Points) {
+    for(int i=0; i < e1Points.size(); i++) {
+        float edgeX, edgeY;
+        
+        if(i == e1Points.size()-1) {
+            edgeX = e1Points[0].x - e1Points[i].x;
+            edgeY = e1Points[0].y - e1Points[i].y;
+        } else {
+            edgeX = e1Points[i+1].x - e1Points[i].x;
+            edgeY = e1Points[i+1].y - e1Points[i].y;
+        }
+        
+        bool result = testSATSeparationForEdge(edgeX, edgeY, e1Points, e2Points);
+        if(!result) {
+            return false;
+        }
+    }
+    for(int i=0; i < e2Points.size(); i++) {
+        float edgeX, edgeY;
+        
+        if(i == e2Points.size()-1) {
+            edgeX = e2Points[0].x - e2Points[i].x;
+            edgeY = e2Points[0].y - e2Points[i].y;
+        } else {
+            edgeX = e2Points[i+1].x - e2Points[i].x;
+            edgeY = e2Points[i+1].y - e2Points[i].y;
+        }
+        bool result = testSATSeparationForEdge(edgeX, edgeY, e1Points, e2Points);
+        if(!result) {
+            return false;
+        }
+    }
+    return true;
+}
 
