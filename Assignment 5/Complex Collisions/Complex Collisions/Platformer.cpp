@@ -141,24 +141,20 @@ void Platformer::update() {
         fixedElapsed -= FIXED_TIMESTEP;
         
         if (!pause) {
+            rec2->rotate(sinf(FIXED_TIMESTEP));
+            
             rec1->update(FIXED_TIMESTEP);
             rec2->update(FIXED_TIMESTEP);
             rec3->update(FIXED_TIMESTEP);
-            
-            rec2->rotate(sinf(FIXED_TIMESTEP));
-            
-            checkCollisions();
         }
     }
     
     if (!pause) {
+        rec2->rotate(sinf(fixedElapsed));
+        
         rec1->update(fixedElapsed);
         rec2->update(fixedElapsed);
         rec3->update(fixedElapsed);
-        
-        rec2->rotate(sinf(fixedElapsed));
-        
-        checkCollisions();
     }
     
     // Handle input
@@ -198,6 +194,26 @@ void Platformer::checkCollisions() {
     std::vector<vec::vec2> rec1Points = rec1->getPoints();
     std::vector<vec::vec2> rec2Points = rec2->getPoints();
     std::vector<vec::vec2> rec3Points = rec3->getPoints();
+//    int maxChecks = 10;
+//    vec::vec2 responseVec;
+    
+//    while (checkSATCollision(rec1Points, rec2Points) && maxChecks > 0) {
+//        rec1->colliding = true;
+//        rec2->colliding = true;
+//        
+//        responseVec = vec::vec2(rec1->position.x - rec2->position.x,
+//                                rec1->position.y - rec2->position.y);
+//        responseVec = vec::normalize(responseVec);
+//        responseVec *= 0.002f;
+//
+//        rec1->translate(-responseVec.x, -responseVec.y);
+//        rec2->translate(responseVec.x, responseVec.y);
+//        
+//        maxChecks -= 1;
+//    }
+//    maxChecks = 10;
+//    rec1->colliding = false;
+//    rec2->colliding = false;
     
     if (checkSATCollision(rec1Points, rec2Points)) {
         rec1->velocity *= -1;

@@ -19,6 +19,9 @@ public:
     vec::vec2 velocity;
     vec::vec2 position;
     
+    // Flags
+    bool colliding = false;
+    
     // Methods
     void create();
     void draw(Shader* shader);
@@ -28,7 +31,7 @@ public:
     void scale(float x, float y);
     void rotate(float angle);
         
-    const std::vector<vec::vec2> getPoints();    
+    const std::vector<vec::vec2> getPoints();
     
 private:
     
@@ -38,14 +41,17 @@ private:
     
     // Data
     Matrix model;
-    Matrix scaling;
     Matrix rotating;
+    vec::vec2 responseVec;
+    vec::vec2 scaling;
+    float angle;
     
     // Object info
     GLfloat vertices[10];
     GLubyte indices[12];
     GLfloat color[20];
     std::vector<vec::vec2> points;
+    
 };
 
 #endif /* __RECTANGLE_HPP__ defined */

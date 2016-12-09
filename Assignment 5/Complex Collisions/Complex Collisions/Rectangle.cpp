@@ -93,6 +93,11 @@ void Rectangle::create() {
 }
 
 void Rectangle::draw(Shader* shader) {
+    model.identity();
+    model.Translate(position.x, position.y, 0.0f);
+    model.Scale(scaling.x, scaling.y, 1.0f);
+    model.Rotate(angle);
+    
     shader->setModelMatrix(model);
     shader->bind();
     
@@ -115,17 +120,13 @@ void Rectangle::update(float elapsed) {
 }
 
 void Rectangle::translate(float x, float y) {
-    position.x = model.m[3][0];
-    position.y = model.m[3][1];
-    
-    model.Translate(x, y, 0.0f);
+    position.x += x;
+    position.y += y;
 }
 
 void Rectangle::scale(float x, float y) {
-    scaling.m[0][0] = x;
-    scaling.m[1][1] = y;
-
-    model.Scale(x, y, 1.0f);
+    scaling.x = x;
+    scaling.y = y;
 }
 
 void Rectangle::rotate(float angle) {
@@ -134,16 +135,20 @@ void Rectangle::rotate(float angle) {
     rotating.m[0][1] = sin(angle);
     rotating.m[1][1] = cos(angle);
     
-    model.Rotate(angle);
+    this->angle += angle;
 }
 
 const std::vector<vec::vec2> Rectangle::getPoints() {
     std::vector<vec::vec2> p;
-    Matrix transformation;
-    transformation.m[0][3] = model.m[3][0];
-    transformation.m[1][3] = model.m[3][1];
+    Matrix t, s;
+
+    t.m[0][3] = position.x;
+    t.m[1][3] = position.y;
     
-    Matrix all = transformation * scaling * rotating;
+    s.m[0][0] = scaling.x;
+    s.m[1][1] = scaling.y;
+    
+    Matrix all = t * s * rotating;
     
     for (int i = 0; i < points.size(); i++) {
         vec::vec4 v(points[i].x, points[i].y, 1.0f, 1.0f);
@@ -153,7 +158,6 @@ const std::vector<vec::vec2> Rectangle::getPoints() {
 
     return p;
 }
-
 
 
 

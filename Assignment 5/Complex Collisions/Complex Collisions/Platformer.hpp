@@ -43,7 +43,7 @@ private:
     float elapsed = 0.0f;
     
     // Flags
-    bool pause = false;
+    bool pause = false;    
     
     // Data
     
