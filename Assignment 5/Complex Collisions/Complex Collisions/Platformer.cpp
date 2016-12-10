@@ -96,13 +96,14 @@ void Platformer::setup() {
     rec2->create();
     rec2->translate(2.0f, -0.5f);
     rec2->scale(1.5f, 1.5f);
+    rec2->velocity = vec::vec2(0.0f, 0.2f);
     
     // Set position of third rectangle
     rec3 = new Rectangle(0.8f, 0.6f);
     rec3->create();
     rec3->translate(0.0f, 1.5f);
     rec3->scale(1.1f, 1.1f);
-    rec3->velocity = vec::vec2(0.0f, -0.13f);
+    rec3->velocity = vec::vec2(0.0f, -0.3f);
 }
 
 void Platformer::render() {
@@ -126,7 +127,6 @@ void Platformer::draw() {
 }
 
 void Platformer::update() {
-    // For annimation
     float ticks = (float) SDL_GetTicks() / 1000.0f;
     elapsed = ticks - lastFrameTicks;
     lastFrameTicks = ticks;
@@ -141,7 +141,7 @@ void Platformer::update() {
         fixedElapsed -= FIXED_TIMESTEP;
         
         if (!pause) {
-            rec2->rotate(sinf(FIXED_TIMESTEP));
+            rec2->rotate(FIXED_TIMESTEP);
             
             rec1->update(FIXED_TIMESTEP);
             rec2->update(FIXED_TIMESTEP);
@@ -150,7 +150,7 @@ void Platformer::update() {
     }
     
     if (!pause) {
-        rec2->rotate(sinf(fixedElapsed));
+        rec2->rotate(fixedElapsed);
         
         rec1->update(fixedElapsed);
         rec2->update(fixedElapsed);
@@ -194,40 +194,91 @@ void Platformer::checkCollisions() {
     std::vector<vec::vec2> rec1Points = rec1->getPoints();
     std::vector<vec::vec2> rec2Points = rec2->getPoints();
     std::vector<vec::vec2> rec3Points = rec3->getPoints();
-//    int maxChecks = 10;
-//    vec::vec2 responseVec;
+    int maxChecks = 10;
+    vec::vec2 n;
     
-//    while (checkSATCollision(rec1Points, rec2Points) && maxChecks > 0) {
-//        rec1->colliding = true;
-//        rec2->colliding = true;
-//        
-//        responseVec = vec::vec2(rec1->position.x - rec2->position.x,
-//                                rec1->position.y - rec2->position.y);
-//        responseVec = vec::normalize(responseVec);
-//        responseVec *= 0.002f;
-//
-//        rec1->translate(-responseVec.x, -responseVec.y);
-//        rec2->translate(responseVec.x, responseVec.y);
-//        
-//        maxChecks -= 1;
-//    }
-//    maxChecks = 10;
-//    rec1->colliding = false;
-//    rec2->colliding = false;
+    while (checkSATCollision(rec1Points, rec2Points) && maxChecks > 0) {
+        vec::vec2 p1 = rec1->getCenter();
+        vec::vec2 p2 = rec2->getCenter();
+        
+        n = vec::vec2(p1.x - p2.x, p1.y - p2.y);
+        n = vec::normalize(n);
+        
+        vec::vec2 v = rec1->velocity - (2 * (vec::dot(rec1->velocity, n)) * n);
+        if (v.x < 0 || v.y < 0) {
+            v.x = fabsf(v.x);
+            v.y = fabsf(v.y);
+        }
+        
+        rec1->velocity = v;
+        rec2->velocity = (v *= -1);
+        
+        maxChecks -= 1;
+    }
+    maxChecks = 10;
     
-    if (checkSATCollision(rec1Points, rec2Points)) {
-        rec1->velocity *= -1;
+    while (checkSATCollision(rec1Points, rec3Points) && maxChecks > 0) {
+        vec::vec2 p1 = rec1->getCenter();
+        vec::vec2 p2 = rec3->getCenter();
+        
+        n = vec::vec2(p1.x - p2.x, p1.y - p2.y);
+        n = vec::normalize(n);
+        
+        vec::vec2 v = rec1->velocity - (2 * (vec::dot(rec1->velocity, n)) * n);
+        if (v.x < 0 && v.y < 0) {
+            v.x = fabsf(v.x);
+            v.y = fabsf(v.y);
+        }
+        
+        rec1->velocity = v;
+        rec3->velocity = (v *= -1);
+        
+        maxChecks -= 1;
     }
-
-    if (checkSATCollision(rec2Points, rec3Points)) {
-        rec2->velocity *= -1;
-    }
+    maxChecks = 10;
     
-    if (checkSATCollision(rec1Points, rec3Points)) {
-        rec1->velocity *= -1;
+    while (checkSATCollision(rec2Points, rec3Points) && maxChecks > 0) {
+        vec::vec2 p1 = rec2->getCenter();
+        vec::vec2 p2 = rec3->getCenter();
+        
+        n = vec::vec2(p1.x - p2.x, p1.y - p2.y);
+        n = vec::normalize(n);
+        
+        vec::vec2 v = rec2->velocity - (2 * (vec::dot(rec2->velocity, n)) * n);
+        if (v.x < 0 && v.y < 0) {
+            v.x = fabsf(v.x);
+            v.y = fabsf(v.y);
+        }
+        
+        rec2->velocity = v;
+        rec3->velocity = (v *= -1);
+        
+        maxChecks -= 1;
     }
+    maxChecks = 10;
 }
 
+void Platformer::checkCollisionWithWall(Rectangle* rec, float opengl_x, float opengl_y) {
+    std::vector<vec::vec2> points = rec->getPoints();
+    float maxX = opengl_x * 0.5f;
+    float maxY = opengl_y * 0.5f;
+    bool touching = false;
+    
+    for (size_t i = 0; i < points.size(); i++) {
+        if (fabsf(points[i].x) >= maxX) {
+            touching =  true;
+            break;
+        }
+        if (fabsf(points[i].y) >= maxY) {
+            touching = true;
+            break;
+        }
+    }
+    
+    if (touching) {
+        
+    }
+}
 
 bool Platformer::testSATSeparationForEdge(float edgeX, float edgeY,
                                          const std::vector<vec::vec2> &points1,
@@ -301,6 +352,8 @@ bool Platformer::checkSATCollision(const std::vector<vec::vec2> &e1Points,
             return false;
         }
     }
+    
+    printf("I am here :)\n");
     return true;
 }
 

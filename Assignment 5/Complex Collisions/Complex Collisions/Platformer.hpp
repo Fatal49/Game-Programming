@@ -9,6 +9,8 @@
 
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
+#define OPENGL_X 7.1f
+#define OPENFL_Y 4.0f
 
 class Platformer : public Game {
 public:
@@ -33,10 +35,11 @@ private:
     // Methods
     void init();
     bool testSATSeparationForEdge(float edgeX, float edgeY,
-                                  const std::vector<vec::vec2> &points1,
-                                  const std::vector<vec::vec2> &points2);
+                                  const std::vector<vec::vec2>& points1,
+                                  const std::vector<vec::vec2>& points2);
     bool checkSATCollision(const std::vector<vec::vec2> &e1Points,
                            const std::vector<vec::vec2> &e2Points);
+    void checkCollisionWithWall(Rectangle* rec, float opengl_x, float opengl_y);
 
     // For animations
     float lastFrameTicks = 0.0f;

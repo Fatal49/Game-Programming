@@ -4,7 +4,8 @@
 Rectangle::Rectangle(float w, float h) : width(w), height(h) {}
 
 Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height),
-    position(rhs.position), model(rhs.model), scaling(rhs.scaling), rotating(rhs.rotating)
+position(rhs.position), matrix(rhs.matrix), scaling(rhs.scaling), rotating(rhs.rotating),
+angle(rhs.angle)
 {
     try {
         // Get the vertices
@@ -14,6 +15,10 @@ Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height)
         // Get the colors
         for (int i = 1; i < 16; i++)
             color[i] = rhs.color[i];
+        
+        // Get the indices
+        for (int i = 1; i < 20; i++)
+            indices[i] = rhs.indices[i];
         
         // Get the points
         for (int i = 0; i < rhs.points.size(); i++)
@@ -93,12 +98,12 @@ void Rectangle::create() {
 }
 
 void Rectangle::draw(Shader* shader) {
-    model.identity();
-    model.Translate(position.x, position.y, 0.0f);
-    model.Scale(scaling.x, scaling.y, 1.0f);
-    model.Rotate(angle);
+    matrix.identity();
+    matrix.Translate(position.x, position.y, 0.0f);
+    matrix.Scale(scaling.x, scaling.y, 1.0f);
+    matrix.Rotate(angle);
     
-    shader->setModelMatrix(model);
+    shader->setModelMatrix(matrix);
     shader->bind();
     
     glVertexAttribPointer(shader->getPositionAttrib(), 2, GL_FLOAT, GL_FALSE, 0, &vertices[0]);
@@ -113,10 +118,82 @@ void Rectangle::draw(Shader* shader) {
     glDisableVertexAttribArray(shader->getColorAttrib());
     
     shader->unbind();
+    
+    if (lines) {
+        matrix.identity();
+        
+        shader->setModelMatrix(matrix);
+        shader->bind();
+        
+        glVertexAttribPointer(shader->getPositionAttrib(), 2, GL_FLOAT, GL_FALSE, 0, &v[0]);
+        glEnableVertexAttribArray(shader->getPositionAttrib());
+        
+        glVertexAttribPointer(shader->getColorAttrib(), 4, GL_FLOAT, GL_FALSE, 0, &c[0]);
+        glEnableVertexAttribArray(shader->getColorAttrib());
+        
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, &i[0]);
+        
+        glDisableVertexAttribArray(shader->getPositionAttrib());
+        glDisableVertexAttribArray(shader->getColorAttrib());
+        
+        shader->unbind();
+    }
+    
+}
+
+void Rectangle::drawLines() {
+    lines = true;
+    std::vector<vec::vec2> p = getPoints();
+    
+    // Set the vertices
+    v[0] = p[0].x;             // Top Left
+    v[1] = p[0].y;
+    
+    v[2] = p[1].x;             // Top Right
+    v[3] = p[1].y;
+    
+    v[4] = p[2].x;             // Bottom Right
+    v[5] = p[2].y;
+    
+    v[6] = p[3].x;             // Bottom Left
+    v[7] = p[3].y;
+    
+    // Set the indices
+    i[0] = 0;               // Right Triangle
+    i[1] = 1;
+    i[2] = 3;
+    
+    i[3] = 1;               // Left Triangle
+    i[4] = 2;
+    i[5] = 3;
+    
+    // Set the colors
+    c[0] = 1.0f;            // Top Left
+    c[1] = 1.0f;
+    c[2] = 1.0f;
+    c[3] = 1.0f;
+    
+    c[4] = 1.0f;            // Top Right
+    c[5] = 1.0f;
+    c[6] = 1.0f;
+    c[7] = 1.0f;
+    
+    c[8] = 1.0f;            // Bottom Right
+    c[9] = 1.0f;
+    c[10] = 1.0f;
+    c[11] = 1.0f;
+    
+    c[12] = 1.0f;           // Bottom Right
+    c[13] = 1.0f;
+    c[14] = 1.0f;
+    c[15] = 1.0f;
 }
 
 void Rectangle::update(float elapsed) {
-    translate(velocity.x * elapsed, velocity.y * elapsed);
+    if (!colliding)
+        translate(velocity.x * elapsed, velocity.y * elapsed);
+    if (lines)
+        drawLines();
 }
 
 void Rectangle::translate(float x, float y) {
@@ -130,17 +207,19 @@ void Rectangle::scale(float x, float y) {
 }
 
 void Rectangle::rotate(float angle) {
-    rotating.m[0][0] = cos(angle);
-    rotating.m[1][0] = -sin(angle);
-    rotating.m[0][1] = sin(angle);
-    rotating.m[1][1] = cos(angle);
+//    rotating.m[0][0] = cos(angle);
+//    rotating.m[1][0] = -sin(angle);
+//    rotating.m[0][1] = sin(angle);
+//    rotating.m[1][1] = cos(angle);
+//    rotating.Rotate(angle);
+//    model.Rotate(angle);
     
     this->angle += angle;
 }
 
 const std::vector<vec::vec2> Rectangle::getPoints() {
     std::vector<vec::vec2> p;
-    Matrix t, s;
+    Matrix t, s, all;
 
     t.m[0][3] = position.x;
     t.m[1][3] = position.y;
@@ -148,7 +227,12 @@ const std::vector<vec::vec2> Rectangle::getPoints() {
     s.m[0][0] = scaling.x;
     s.m[1][1] = scaling.y;
     
-    Matrix all = t * s * rotating;
+    rotating.m[0][0] = cos(angle);
+    rotating.m[1][0] = sin(angle);
+    rotating.m[0][1] = -sin(angle);
+    rotating.m[1][1] = cos(angle);
+    
+    all = t * s * rotating;
     
     for (int i = 0; i < points.size(); i++) {
         vec::vec4 v(points[i].x, points[i].y, 1.0f, 1.0f);
@@ -158,6 +242,16 @@ const std::vector<vec::vec2> Rectangle::getPoints() {
 
     return p;
 }
+
+float Rectangle::getWidth() const { return width; }
+
+float Rectangle::getHeight() const { return height; }
+
+vec::vec2 Rectangle::getCenter() {
+    std::vector<vec::vec2> p = getPoints();
+    return vec::vec2(p[0].x + (width * 0.5), p[0].y - (height * 0.5));
+}
+
 
 
 
