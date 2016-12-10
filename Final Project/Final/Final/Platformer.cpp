@@ -21,7 +21,13 @@ Platformer::~Platformer() {
         printf("Freeing shader\n");
         delete shader;
     }
-      
+    
+    if (player1)
+        delete player1;
+    
+    if (player2)
+        delete player2;
+    
     SDL_Quit();
 }
 
@@ -84,19 +90,30 @@ void Platformer::setup() {
     glDepthFunc(GL_LESS);
     
     // Load, compile & link the shaders
-    shader = new Shader("vertex_textured.glsl", "fragment_textured.glsl");
+    shader = new Shader("vertex.glsl", "fragment.glsl");
     
     // Set matrices & orthographic projection
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
     shader->setModelMatrix(model);
     shader->setViewMatrix(view);
     shader->setProjectionMatrix(projection);
+    
+    // Setup player 1
+    player1 = new Rectangle(0.5f, 0.5f);
+    player1->create();
+    player1->translate(-1.777, 0.0f);
+    player1->scale(1.5f, 1.5f);
+    
+    // Setup player 2
+    player2 = new Rectangle(0.5f, 0.5f);
+    player2->create();
+    player2->translate(1.777f, 0.0f);
+    player2->scale(1.5f, 1.5f);
 }
 
 void Platformer::render() {
     // Set the color for the viewport
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);       // Light black color
-//    glClearColor(122.0f / 256.0f, 224.0f / 256.0f, 241.0f / 255.0f, 1.0f);    // Light blue
     
     // Clear the buffer with preset values
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,7 +126,8 @@ void Platformer::render() {
 }
 
 void Platformer::draw() {
-
+    player1->draw(shader);
+    player2->draw(shader);
 }
 
 void Platformer::update() {
@@ -127,20 +145,63 @@ void Platformer::update() {
     
     while (fixedElapsed >= FIXED_TIMESTEP ) {
         fixedElapsed -= FIXED_TIMESTEP;
+        
+        if (!pause) {
+            player1->update(FIXED_TIMESTEP);
+            player2->update(FIXED_TIMESTEP);
+        }
     }
     
-
+    if (!pause) {
+        player1->update(fixedElapsed);
+        player2->update(fixedElapsed);
+    }
     
     // Handle input
+    const Uint8* keys = SDL_GetKeyboardState(NULL);
+    
+        // Player 1 movement
+    if (keys[SDL_SCANCODE_D]) {
+        player1->translate(0.035f, 0.0f);
+    }
+    
+    if (keys[SDL_SCANCODE_S]) {
+        player1->translate(0.0f, -0.035f);
+    }
+        
+    if (keys[SDL_SCANCODE_A]) {
+        player1->translate(-0.035f, 0.0f);
+    }
+        
+    if (keys[SDL_SCANCODE_W]) {
+        player1->translate(0.0f, 0.035f);
+    }
+    
+    
+    // Player 1 movement
+    if (keys[SDL_SCANCODE_RIGHT]) {
+        player2->translate(0.035f, 0.0f);
+    }
+    
+    if (keys[SDL_SCANCODE_DOWN]) {
+        player2->translate(0.0f, -0.035f);
+    }
+    
+    if (keys[SDL_SCANCODE_LEFT]) {
+        player2->translate(-0.035f, 0.0f);
+    }
+    
+    if (keys[SDL_SCANCODE_UP]) {
+        player2->translate(0.0f, 0.035f);
+    }
+
+    
     SDL_Event e;
     SDL_PollEvent(&e);
     switch (e.type) {
         case SDL_KEYDOWN:
             switch (e.key.keysym.scancode) {
-                case SDL_SCANCODE_RIGHT:
-                    
 
-                    break;
                 default:
                     break;
             }
@@ -149,8 +210,9 @@ void Platformer::update() {
         case SDL_KEYUP:
             switch (e.key.keysym.scancode) {
                 case SDL_SCANCODE_SPACE:
-
+                    pause = true;
                     break;
+                    
                 default:
                     break;
             }
