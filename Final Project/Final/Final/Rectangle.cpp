@@ -118,82 +118,11 @@ void Rectangle::draw(Shader* shader) {
     glDisableVertexAttribArray(shader->getColorAttrib());
     
     shader->unbind();
-    
-    if (lines) {
-        matrix.identity();
-        
-        shader->setModelMatrix(matrix);
-        shader->bind();
-        
-        glVertexAttribPointer(shader->getPositionAttrib(), 2, GL_FLOAT, GL_FALSE, 0, &v[0]);
-        glEnableVertexAttribArray(shader->getPositionAttrib());
-        
-        glVertexAttribPointer(shader->getColorAttrib(), 4, GL_FLOAT, GL_FALSE, 0, &c[0]);
-        glEnableVertexAttribArray(shader->getColorAttrib());
-        
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, &i[0]);
-        
-        glDisableVertexAttribArray(shader->getPositionAttrib());
-        glDisableVertexAttribArray(shader->getColorAttrib());
-        
-        shader->unbind();
-    }
-    
-}
-
-void Rectangle::drawLines() {
-    lines = true;
-    std::vector<vec::vec2> p = getPoints();
-    
-    // Set the vertices
-    v[0] = p[0].x;             // Top Left
-    v[1] = p[0].y;
-    
-    v[2] = p[1].x;             // Top Right
-    v[3] = p[1].y;
-    
-    v[4] = p[2].x;             // Bottom Right
-    v[5] = p[2].y;
-    
-    v[6] = p[3].x;             // Bottom Left
-    v[7] = p[3].y;
-    
-    // Set the indices
-    i[0] = 0;               // Right Triangle
-    i[1] = 1;
-    i[2] = 3;
-    
-    i[3] = 1;               // Left Triangle
-    i[4] = 2;
-    i[5] = 3;
-    
-    // Set the colors
-    c[0] = 1.0f;            // Top Left
-    c[1] = 1.0f;
-    c[2] = 1.0f;
-    c[3] = 1.0f;
-    
-    c[4] = 1.0f;            // Top Right
-    c[5] = 1.0f;
-    c[6] = 1.0f;
-    c[7] = 1.0f;
-    
-    c[8] = 1.0f;            // Bottom Right
-    c[9] = 1.0f;
-    c[10] = 1.0f;
-    c[11] = 1.0f;
-    
-    c[12] = 1.0f;           // Bottom Right
-    c[13] = 1.0f;
-    c[14] = 1.0f;
-    c[15] = 1.0f;
 }
 
 void Rectangle::update(float elapsed) {
     if (!colliding)
         translate(velocity.x * elapsed, velocity.y * elapsed);
-    if (lines)
-        drawLines();
 }
 
 void Rectangle::translate(float x, float y) {
@@ -207,13 +136,6 @@ void Rectangle::scale(float x, float y) {
 }
 
 void Rectangle::rotate(float angle) {
-//    rotating.m[0][0] = cos(angle);
-//    rotating.m[1][0] = -sin(angle);
-//    rotating.m[0][1] = sin(angle);
-//    rotating.m[1][1] = cos(angle);
-//    rotating.Rotate(angle);
-//    model.Rotate(angle);
-    
     this->angle += angle;
 }
 

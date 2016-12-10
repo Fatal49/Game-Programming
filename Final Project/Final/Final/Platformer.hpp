@@ -6,10 +6,13 @@
 #include "Shader.hpp"
 #include "Matrix.hpp"
 #include "Rectangle.hpp"
+#include <string>
 #include <SDL2_image/SDL_image.h>
 
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
+
+enum gameState { START_SCREEN, GAME };
 
 class Platformer : public Game {
 public:
@@ -33,6 +36,8 @@ private:
     // Methods
     void init();
     GLuint LoadTexture(const char *image_path);
+    void DrawText(Shader *program, GLuint fontTexture,
+                  std::string text, float size, float spacing, bool fade);
 
     // For animations
     float lastFrameTicks = 0.0f;
@@ -42,16 +47,20 @@ private:
     // Flags
     bool pause = false;
     
+    // Game States
+    gameState gs;
+    
     // Data
     
         // Shader
         Shader* shader = nullptr;
+        Shader* texShader = nullptr;
     
         // Matrices
-        Matrix model, view, projection;
+        Matrix model, view, projection, matrix;
     
         // Texture ID's
-        GLuint tex1;
+        GLuint fontTexture;
     
         // Players
         Rectangle* player1 = nullptr;

@@ -20,12 +20,10 @@ public:
     
     // Flags
     bool colliding = false;
-    bool lines = false;    
     
     // Methods
     void create();
     void draw(Shader* shader);
-    void drawLines();
     void update(float elapsed);
     
     void translate(float x, float y);
@@ -46,7 +44,6 @@ private:
     // Data
     Matrix matrix;
     Matrix rotating;
-    vec::vec2 responseVec;
     vec::vec2 scaling;
     float angle;
     
