@@ -6,20 +6,21 @@
 #include "vec.h"
 #include "Shader.hpp"
 #include <vector>
-#include <SDL2/SDL_opengl.h>
+#include <SDL2_image/SDL_image.h>
 
 class Rectangle {
 public:
     
     // Constructors and Deconstructor
-    Rectangle(float w, float h);
+    Rectangle(float w, float h, bool textured = false);
     Rectangle(const Rectangle& rhs);
     
     // Physics info
     vec::vec2 velocity;
     
     // Flags
-    bool colliding = false;
+    bool colliding;
+    bool texture;
     
     // Methods
     void create();
@@ -35,7 +36,12 @@ public:
     float getHeight() const;
     vec::vec2 getCenter();
     
+    void LoadTexture(const char *image_path);
+    
 private:
+    
+    // Id's
+    GLuint textureID;
     
     // Dimensions
     float width;
@@ -49,15 +55,10 @@ private:
     
     // Object info
     vec::vec2 position;
-    GLfloat vertices[10];
-    GLubyte indices[12];
-    GLfloat color[20];
+    std::vector<GLfloat> vertices;
+    std::vector<GLubyte> indices;
+    std::vector<GLfloat> data;
     std::vector<vec::vec2> points;
-    
-    // Debug info
-    GLfloat v[8];
-    GLubyte i[6];
-    GLfloat c[16];
     
 };
 

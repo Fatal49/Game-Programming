@@ -19,7 +19,7 @@
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
 
 // Angle that controls fading
-#define FADE 90.0f
+#define FADE 100.0f
 
 enum gameState { START_SCREEN, GAME };
 enum fade { FADING_IN, FADING_OUT };
@@ -52,22 +52,26 @@ private:
     float lerp(float from, float to, float time);
     
     // For animations
-    float lastFrameTicks = 0.0f;
-    float totalTime = 0.0f;
-    float elapsed = 0.0f;
+    float lastFrameTicks;
+    float totalTime;
+    float elapsed;
     
     // Flags
-    bool pause = false;
+    bool pause;
     
     // Enums
     gameState gs;
     fade fading;
     
+    // Background Colors
+    vec::vec4 lightBlack = vec::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+    vec::vec4 black = vec::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    
     // Data
     
         // Shader
-        Shader* shader = nullptr;
-        Shader* texShader = nullptr;
+        Shader* shader;
+        Shader* texShader;
     
         // Matrices
         Matrix model, view, projection, matrix;
@@ -76,8 +80,8 @@ private:
         GLuint fontTexture;
     
         // Players
-        Rectangle* player1 = nullptr;
-        Rectangle* player2 = nullptr;
+        Rectangle* player1;
+        Rectangle* player2;
 };
 
 #endif /* __PLATFORMER_HPP__ defined */

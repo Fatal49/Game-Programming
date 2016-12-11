@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5E3D4CC11DFBE3E9006B19D1 /* Rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E3D4CBE1DFBE3E9006B19D1 /* Rectangle.cpp */; };
-		5E3D4CC41DFC5EDC006B19D1 /* ParticleEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E3D4CC21DFC5EDC006B19D1 /* ParticleEmitter.cpp */; };
+		5E3D4CCA1DFD21D8006B19D1 /* BulletEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E3D4CC81DFD21D8006B19D1 /* BulletEmitter.cpp */; };
 		5E7645CF1DF35AB30078A6F6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7645CE1DF35AB30078A6F6 /* main.cpp */; };
 		5E7645D61DF35ADA0078A6F6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E7645D51DF35ADA0078A6F6 /* OpenGL.framework */; };
 		5E7645DA1DF35AF00078A6F6 /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E7645D71DF35AF00078A6F6 /* SDL2_image.framework */; };
@@ -37,8 +37,8 @@
 		5E3D4CBE1DFBE3E9006B19D1 /* Rectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rectangle.cpp; sourceTree = "<group>"; };
 		5E3D4CBF1DFBE3E9006B19D1 /* Rectangle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Rectangle.hpp; sourceTree = "<group>"; };
 		5E3D4CC01DFBE3E9006B19D1 /* vertex.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vertex.glsl; sourceTree = "<group>"; };
-		5E3D4CC21DFC5EDC006B19D1 /* ParticleEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleEmitter.cpp; sourceTree = "<group>"; };
-		5E3D4CC31DFC5EDC006B19D1 /* ParticleEmitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ParticleEmitter.hpp; sourceTree = "<group>"; };
+		5E3D4CC81DFD21D8006B19D1 /* BulletEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BulletEmitter.cpp; sourceTree = "<group>"; };
+		5E3D4CC91DFD21D8006B19D1 /* BulletEmitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BulletEmitter.hpp; sourceTree = "<group>"; };
 		5E7645CB1DF35AB30078A6F6 /* Final */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Final; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E7645CE1DF35AB30078A6F6 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5E7645D51DF35ADA0078A6F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -101,8 +101,8 @@
 				5E7645DF1DF35B6C0078A6F6 /* Game.hpp */,
 				5E7645E21DF35B6C0078A6F6 /* Platformer.cpp */,
 				5E7645E31DF35B6C0078A6F6 /* Platformer.hpp */,
-				5E3D4CC21DFC5EDC006B19D1 /* ParticleEmitter.cpp */,
-				5E3D4CC31DFC5EDC006B19D1 /* ParticleEmitter.hpp */,
+				5E3D4CC81DFD21D8006B19D1 /* BulletEmitter.cpp */,
+				5E3D4CC91DFD21D8006B19D1 /* BulletEmitter.hpp */,
 				5E3D4CBE1DFBE3E9006B19D1 /* Rectangle.cpp */,
 				5E3D4CBF1DFBE3E9006B19D1 /* Rectangle.hpp */,
 				5E7645E41DF35B6C0078A6F6 /* Shader.cpp */,
@@ -192,11 +192,11 @@
 			files = (
 				5E7645E91DF35B6C0078A6F6 /* Matrix.cpp in Sources */,
 				5E7645CF1DF35AB30078A6F6 /* main.cpp in Sources */,
+				5E3D4CCA1DFD21D8006B19D1 /* BulletEmitter.cpp in Sources */,
 				5E7645E81DF35B6C0078A6F6 /* Game.cpp in Sources */,
 				5E7645EA1DF35B6C0078A6F6 /* Platformer.cpp in Sources */,
 				5E7645EB1DF35B6C0078A6F6 /* Shader.cpp in Sources */,
 				5E3D4CC11DFBE3E9006B19D1 /* Rectangle.cpp in Sources */,
-				5E3D4CC41DFC5EDC006B19D1 /* ParticleEmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

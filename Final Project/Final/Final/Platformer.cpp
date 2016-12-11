@@ -1,6 +1,8 @@
 #include "Platformer.hpp"
 
-Platformer::Platformer(float w, float h, const char* name): Game(w, h, name) {
+Platformer::Platformer(float w, float h, const char* name): Game(w, h, name), elapsed(0.0f),
+lastFrameTicks(0.0f), totalTime(0.0f), pause(false), shader(nullptr), texShader(nullptr),
+player1(nullptr), player2(nullptr) {
     if (!createWindow()) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
@@ -8,7 +10,8 @@ Platformer::Platformer(float w, float h, const char* name): Game(w, h, name) {
     }
 }
 
-Platformer::Platformer(const char* name) : Game(name) {
+Platformer::Platformer(const char* name) : Game(name), elapsed(0.0f),
+lastFrameTicks(0.0f), totalTime(0.0f), pause(false) {
     if (!createWindow()) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
@@ -120,8 +123,9 @@ void Platformer::setup() {
     texShader->setProjectionMatrix(projection);
     
     // Setup player 1
-    player1 = new Rectangle(0.5f, 0.5f);
+    player1 = new Rectangle(0.5f, 0.5f, true);
     player1->create();
+    player1->LoadTexture("assets/sprite1.png");
     player1->translate(-1.777, 0.0f);
     player1->scale(1.5f, 1.5f);
     
@@ -133,8 +137,19 @@ void Platformer::setup() {
 }
 
 void Platformer::render() {
-    // Set the color for the viewport
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);       // Light black color
+    // Set the color for the viewport depending on the game state
+    switch (gs) {
+        case START_SCREEN:
+            glClearColor(black.x, black.y, black.z, black.w);
+            break;
+            
+        case GAME:
+            glClearColor(lightBlack.x, lightBlack.y, lightBlack.z, lightBlack.w);
+            break;
+            
+        default:
+            break;
+    }
     
     // Clear the buffer with preset values
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -183,8 +198,15 @@ void Platformer::draw() {
         
         case GAME:
         {
-            player1->draw(shader);
-            player2->draw(shader);
+            if (player1->texture)
+                player1->draw(texShader);
+            else
+                player1->draw(shader);
+            
+            if (player2->texture)
+                player2->draw(texShader);
+            else
+                player2->draw(shader);
         } break;
             
         default:
@@ -315,10 +337,11 @@ void Platformer::update() {
 
 void Platformer::DrawText(Shader *program, GLuint fontTexture,
                           std::string text, float size, float spacing, bool fade) {
-    static float time = totalTime;
-    float texture_size = 1.0/16.0f;
+    static float fadingTime = 0.0f;
+    float texture_size = 1.0 / 16.0f;
     std::vector<float> vertexData;
     std::vector<float> texCoordData;
+    
     for(int i=0; i < text.size(); i++) {
         float texture_x = (float)(((int)text[i]) % 16) / 16.0f;
         float texture_y = (float)(((int)text[i]) / 16) / 16.0f;
@@ -352,9 +375,9 @@ void Platformer::DrawText(Shader *program, GLuint fontTexture,
         switch (fading) {
             case FADING_OUT:
             {
-                if (time <= degreesToRadians(FADE)) {
-                    glUniform1f(fadeUniform, cosf(time));
-                    time += elapsed;
+                if (fadingTime <= degreesToRadians(FADE)) {
+                    glUniform1f(fadeUniform, cosf(fadingTime));
+                    fadingTime += elapsed;
                 } else {
                     glUniform1f(fadeUniform, cosf(degreesToRadians(FADE)));
                     fading = FADING_IN;
@@ -363,9 +386,9 @@ void Platformer::DrawText(Shader *program, GLuint fontTexture,
                 
             case FADING_IN:
             {
-                if (time >= 0.0f) {
-                    glUniform1f(fadeUniform, cosf(time));
-                    time -= elapsed;
+                if (fadingTime >= 0.0f) {
+                    glUniform1f(fadeUniform, cosf(fadingTime));
+                    fadingTime -= elapsed;
                 } else {
                     fading = FADING_OUT;
                 }
@@ -374,6 +397,8 @@ void Platformer::DrawText(Shader *program, GLuint fontTexture,
             default:
                 break;
         }
+        
+        
     } else
         glUniform1f(fadeUniform, 1.0f);
     
