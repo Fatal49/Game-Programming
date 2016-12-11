@@ -106,6 +106,9 @@ void Platformer::setup() {
     // Set the game state
     gs = START_SCREEN;
     
+    // Set the fading
+    fading = FADING_OUT;
+    
     // Set matrices & orthographic projection in each shader
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
     shader->setModelMatrix(matrix);
@@ -194,7 +197,7 @@ void Platformer::update() {
     float ticks = (float) SDL_GetTicks() / 1000.0f;
     elapsed = ticks - lastFrameTicks;
     lastFrameTicks = ticks;
-    angle += elapsed;
+    totalTime += elapsed;
     float fixedElapsed = elapsed;
     
     switch (gs) {
@@ -312,6 +315,7 @@ void Platformer::update() {
 
 void Platformer::DrawText(Shader *program, GLuint fontTexture,
                           std::string text, float size, float spacing, bool fade) {
+    static float time = totalTime;
     float texture_size = 1.0/16.0f;
     std::vector<float> vertexData;
     std::vector<float> texCoordData;
@@ -344,9 +348,33 @@ void Platformer::DrawText(Shader *program, GLuint fontTexture,
     glVertexAttribPointer(program->getTexCoordAttrib(), 2, GL_FLOAT, false, 0, texCoordData.data());
     glEnableVertexAttribArray(program->getTexCoordAttrib());
     
-    if (fade)
-        glUniform1f(fadeUniform, cosf(angle));
-    else
+    if (fade) {
+        switch (fading) {
+            case FADING_OUT:
+            {
+                if (time <= degreesToRadians(FADE)) {
+                    glUniform1f(fadeUniform, cosf(time));
+                    time += elapsed;
+                } else {
+                    glUniform1f(fadeUniform, cosf(degreesToRadians(FADE)));
+                    fading = FADING_IN;
+                }
+            } break;
+                
+            case FADING_IN:
+            {
+                if (time >= 0.0f) {
+                    glUniform1f(fadeUniform, cosf(time));
+                    time -= elapsed;
+                } else {
+                    fading = FADING_OUT;
+                }
+            } break;
+                
+            default:
+                break;
+        }
+    } else
         glUniform1f(fadeUniform, 1.0f);
     
     glBindTexture(GL_TEXTURE_2D, fontTexture);
@@ -356,6 +384,23 @@ void Platformer::DrawText(Shader *program, GLuint fontTexture,
     glDisableVertexAttribArray(program->getTexCoordAttrib());
     
     program->unbind();
+}
+
+float Platformer::easeInOut(float from, float to, float time) {
+    float tVal;
+    if(time > 0.5) {
+        float oneMinusT = 1.0f-((0.5f-time)*-2.0f);
+        tVal = 1.0f - ((oneMinusT * oneMinusT * oneMinusT * oneMinusT *
+                        oneMinusT) * 0.5f);
+    } else {
+        time *= 2.0;
+        tVal = (time*time*time*time*time)/2.0;
+    }
+    return (1.0f-tVal)*from + tVal*to;
+}
+
+float Platformer::lerp(float from, float to, float time) {
+    return (1.0-time)*from + time*to;
 }
 
 
