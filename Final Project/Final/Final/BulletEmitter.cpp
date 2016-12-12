@@ -1,6 +1,6 @@
 #include "BulletEmitter.hpp"
 
-BulletEmitter::BulletEmitter(float w, float h, unsigned int maxBullets, vec::vec2 v)
+BulletEmitter::BulletEmitter(float w, float h, vec::vec2 v, unsigned int maxBullets)
 : maxBullets(maxBullets), velocity(v), width(w), height(h), angle(0.0f),
 scaling(vec::vec2(1.0f, 1.0f)) {}
 

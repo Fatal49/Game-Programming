@@ -2,7 +2,7 @@
 
 Platformer::Platformer(float w, float h, const char* name): Game(w, h, name), elapsed(0.0f),
 lastFrameTicks(0.0f), totalTime(0.0f), pause(false), shader(nullptr), texShader(nullptr),
-player1(nullptr), player2(nullptr), bullet(nullptr), be(nullptr) {
+player1(nullptr), player2(nullptr) {
     if (!createWindow()) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
@@ -36,12 +36,6 @@ Platformer::~Platformer() {
     if (player2)
         delete player2;
     
-    if (bullet)
-        delete bullet;
-    
-    if (be)
-        delete be;
-    
     SDL_Quit();
 }
 
@@ -70,7 +64,8 @@ void Platformer::setup() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
     
     // Load, compile & link the untextured shaders
     shader = new Shader("vertex.glsl", "fragment.glsl");
@@ -87,6 +82,9 @@ void Platformer::setup() {
     // Set the fading
     fading = FADING_OUT;
     
+    // Set the shooting direction for each player
+    direction shootingDirection = RIGHT;
+    
     // Set matrices & orthographic projection in each shader
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
     shader->setModelMatrix(matrix);
@@ -98,26 +96,25 @@ void Platformer::setup() {
     texShader->setProjectionMatrix(projection);
     
     // Setup player 1
-    player1 = new Rectangle(0.5f, 0.5f, true);
+    player1 = new Rectangle(0.5f, 0.5f);
     player1->create();
     player1->LoadTexture("assets/sprite1.png");
     player1->translate(-1.777, 0.0f);
     player1->scale(1.5f, 1.5f);
+    player1->setupBulletEmitter(0.5f, 2.0f, degreesToRadians(-90.0f),
+                                vec::vec2(0.125f, 0.125f), "assets/bullet.png",
+                                shootingDirection);
     
     // Setup player 2
+    shootingDirection = LEFT;
     player2 = new Rectangle(0.5f, 0.5f);
     player2->create();
+    player2->LoadTexture("assets/sprite2.png");
     player2->translate(1.777f, 0.0f);
     player2->scale(1.5f, 1.5f);
-    
-    // Setup the Bullet Emitter
-    be = new BulletEmitter(0.5f, 2.0f, 10, vec::vec2(0.06f, 0.0f));
-    be->LoadTexture("assets/bullet.png");
-    be->createBullets();
-    be->position = vec::vec2(0.0f, 0.5f);
-    be->scale(0.125f, 0.125f);
-    be->rotate(degreesToRadians(-90.0f));
-    
+    player2->setupBulletEmitter(0.5f, 2.0f, degreesToRadians(90.0f),
+                                vec::vec2(0.125f, 0.125f), "assets/bullet.png",
+                                shootingDirection);
 }
 
 void Platformer::render() {
@@ -182,20 +179,9 @@ void Platformer::draw() {
         
         case GAME:
         {
-            // Draw player1 using the correct shader
-            if (player1->texture)
-                player1->draw(texShader);
-            else
-                player1->draw(shader);
-            
-            // Draw player2 using the correct shader
-            if (player2->texture)
-                player2->draw(texShader);
-            else
-                player2->draw(shader);
-            
-            // Draw the bullets
-            be->draw(texShader);
+            // Draw the players
+            player1->draw(texShader);
+            player2->draw(texShader);
             
         } break;
             
@@ -245,53 +231,52 @@ void Platformer::update() {
                 if (!pause) {
                     player1->update(FIXED_TIMESTEP);
                     player2->update(FIXED_TIMESTEP);
-                    be->update(FIXED_TIMESTEP);
                 }
             }
             
             if (!pause) {
                 player1->update(fixedElapsed);
                 player2->update(fixedElapsed);
-                be->update(fixedElapsed);
             }
             
             // Get key input
             const Uint8* keys = SDL_GetKeyboardState(NULL);
             
             // Player 1 movement
-            if (keys[SDL_SCANCODE_D]) {
-                player1->translate(0.035f, 0.0f);
-            }
-            
-            if (keys[SDL_SCANCODE_S]) {
-                player1->translate(0.0f, -0.035f);
+            if (keys[SDL_SCANCODE_W]) {
+                player1->translate(0.0f, 0.035f);
             }
             
             if (keys[SDL_SCANCODE_A]) {
                 player1->translate(-0.035f, 0.0f);
             }
             
-            if (keys[SDL_SCANCODE_W]) {
-                player1->translate(0.0f, 0.035f);
+            if (keys[SDL_SCANCODE_S]) {
+                player1->translate(0.0f, -0.035f);
+            }
+            
+            if (keys[SDL_SCANCODE_D]) {
+                player1->translate(0.035f, 0.0f);
             }
             
             
             // Player 2 movement
-            if (keys[SDL_SCANCODE_RIGHT]) {
-                player2->translate(0.035f, 0.0f);
+            if (keys[SDL_SCANCODE_I]) {
+                player2->translate(0.0f, 0.035f);
             }
             
-            if (keys[SDL_SCANCODE_DOWN]) {
-                player2->translate(0.0f, -0.035f);
-            }
-            
-            if (keys[SDL_SCANCODE_LEFT]) {
+            if (keys[SDL_SCANCODE_J]) {
                 player2->translate(-0.035f, 0.0f);
             }
             
-            if (keys[SDL_SCANCODE_UP]) {
-                player2->translate(0.0f, 0.035f);
+            if (keys[SDL_SCANCODE_K]) {
+                player2->translate(0.0f, -0.035f);
             }
+            
+            if (keys[SDL_SCANCODE_L]) {
+                player2->translate(0.035f, 0.0f);
+            }
+            
             
             SDL_Event e;
             while (SDL_PollEvent(&e)) {
@@ -299,9 +284,12 @@ void Platformer::update() {
                     if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
                         setPlayingFlag(false);
                     
-                    if (e.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-                        printf("I am in the while loop \n");
-                        be->shootABullet();
+                    if (e.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
+                        player1->shootABullet();
+                    }
+                    
+                    if (e.key.keysym.scancode == SDL_SCANCODE_RSHIFT) {
+                        player2->shootABullet();
                     }
                 }
             }

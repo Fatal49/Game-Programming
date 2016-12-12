@@ -19,7 +19,7 @@ class BulletEmitter {
 public:
     
     // Constructors and deconstructors
-    BulletEmitter(float w, float h, unsigned int maxBullets, vec::vec2 v);
+    BulletEmitter(float w, float h, vec::vec2 v = vec::vec2(0.0f), unsigned int maxBullets = 10);
     BulletEmitter(unsigned int maxBullets);
     BulletEmitter(const BulletEmitter& rhs);
     ~BulletEmitter();

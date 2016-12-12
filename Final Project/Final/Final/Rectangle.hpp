@@ -2,25 +2,19 @@
 #ifndef __RECTANGLE_HPP__
 #define __RECTANGLE_HPP__
 
-#include <stdio.h>
-#include "vec.h"
-#include "Shader.hpp"
-#include <vector>
-#include <SDL2_image/SDL_image.h>
+#include "BulletEmitter.hpp"
+
+enum direction { TOP, RIGHT, BOTTOM, LEFT };
 
 class Rectangle {
 public:
     
     // Constructors and Deconstructor
-    Rectangle(float w, float h, bool textured = false);
+    Rectangle(float w, float h);
     Rectangle(const Rectangle& rhs);
     
     // Physics info
     vec::vec2 velocity;
-    
-    // Flags
-    bool colliding;
-    bool texture;
     
     // Methods
     void create();
@@ -37,6 +31,11 @@ public:
     vec::vec2 getCenter();
     
     void LoadTexture(const char *image_path);
+    void setupBulletEmitter(float width, float height, float rotate,
+                            vec::vec2 scale, const char* textureFileName,
+                            direction shootingDirection,
+                            unsigned int maxBullets = 10);
+    void shootABullet();
     
 private:
     
@@ -57,8 +56,11 @@ private:
     vec::vec2 position;
     std::vector<GLfloat> vertices;
     std::vector<GLubyte> indices;
-    std::vector<GLfloat> data;
+    std::vector<GLfloat> texCoord;
     std::vector<vec::vec2> points;
+    
+    // BulletEmitter
+    BulletEmitter* be;
     
 };
 

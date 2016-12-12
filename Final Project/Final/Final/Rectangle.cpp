@@ -1,22 +1,28 @@
 
 #include "Rectangle.hpp"
 
-Rectangle::Rectangle(float w, float h, bool textured) : width(w), height(h),
-colliding(false), texture(textured), scaling(vec::vec2(1.0f, 1.0f)) {}
+Rectangle::Rectangle(float w, float h) : width(w), height(h),
+scaling(vec::vec2(1.0f, 1.0f)), be(nullptr) {}
 
 Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height),
 position(rhs.position), matrix(rhs.matrix), scaling(rhs.scaling), rotating(rhs.rotating),
-angle(rhs.angle), velocity(rhs.velocity), colliding(rhs.colliding), texture(rhs.texture),
-textureID(rhs.textureID)
+angle(rhs.angle), velocity(rhs.velocity), textureID(rhs.textureID)
 {
     try {
+        // Get the BulletEmitter
+        if (be) {
+            delete be;
+            if (rhs.be)
+                be = new BulletEmitter(*(rhs.be));
+        }
+        
         // Get the vertices
         for (size_t i = 0; i < rhs.vertices.size(); i++)
             vertices[i] = rhs.vertices[i];
         
         // Get the colors
-        for (size_t i = 1; i < rhs.data.size(); i++)
-            data[i] = rhs.data[i];
+        for (size_t i = 1; i < rhs.texCoord.size(); i++)
+            texCoord[i] = rhs.texCoord[i];
         
         // Get the indices
         for (size_t i = 1; i < rhs.indices.size(); i++)
@@ -35,74 +41,37 @@ void Rectangle::create() {
     float halfW = width * 0.5f;
     float halfH = height * 0.5f;
     
-    if (!texture) {
-        vertices.clear();
-        indices.clear();
-        data.clear();
-        
-        vertices.insert(vertices.end(), {
-            -halfW, halfH,          // Top Left
-            halfW, halfH,           // Top Right
-            0, 0,                   // Center
-            -halfW, -halfH,         // Bottom Left
-            halfW, -halfH           // Bottom Right
-        });
-        
-        indices.insert(indices.end(), {
-            0, 1, 2,                // Triangle on the top
-            0, 2, 3,                // Triangle on the right
-            1, 2, 4,                // Triangle on the left
-            3, 2, 4                 // Triangle on the bottom
-        });
-        
-        data.insert(data.end(), {
-            1.0f, 0.0f, 0.0f, 1.0f,         // Top Left
-            0.0f, 1.0f, 0.0f, 1.0f,         // Top Right
-            0.0f, 0.0f, 1.0f, 1.0f,         // Center
-            0.0f, 1.0f, 0.0f, 1.0f,         // Bottom Left
-            1.0f, 0.0f, 0.0f, 1.0f          // Bottom Right
-        });
-        
-        points.insert(points.end(), {
-            vec::vec2(vertices[0], vertices[1]),    // Top Left
-            vec::vec2(vertices[2], vertices[3]),    // Top Right
-            vec::vec2(vertices[8], vertices[9]),    // Bottom Right
-            vec::vec2(vertices[6], vertices[7])     // Bottom Left
-        });
-    } else  {
-        vertices.clear();
-        indices.clear();
-        data.clear();
-        
-        vertices.insert(vertices.end(), {
-            -halfW, halfH,          // Top Left
-            halfW, halfH,           // Top Right
-            -halfW, -halfH,         // Bottom Left
-            halfW, -halfH           // Bottom Right
-        });
-        
-        indices.insert(indices.end(), {
-            0, 1, 2,                // Triangle on the right
-            3, 2, 1                 // Triangle on the left
-        });
-        
-        data.insert(data.end(), {
-            0, 0,                   // Triangle on the right
-            1, 0,
-            0, 1,
-            1, 1,                   // Triangle on the left
-            0, 1,
-            1, 0
-        });
-        
-        points.insert(points.end(), {
-            vec::vec2(vertices[0], vertices[1]),    // Top Left
-            vec::vec2(vertices[2], vertices[3]),    // Top Right
-            vec::vec2(vertices[6], vertices[7]),    // Bottom Right
-            vec::vec2(vertices[4], vertices[5])     // Bottom Left
-        });
-    }
-
+    vertices.clear();
+    indices.clear();
+    texCoord.clear();
+    
+    vertices.insert(vertices.end(), {
+        -halfW, halfH,          // Top Left
+        halfW, halfH,           // Top Right
+        -halfW, -halfH,         // Bottom Left
+        halfW, -halfH           // Bottom Right
+    });
+    
+    indices.insert(indices.end(), {
+        0, 1, 2,                // Triangle on the right
+        3, 2, 1                 // Triangle on the left
+    });
+    
+    texCoord.insert(texCoord.end(), {
+        0, 0,                   // Triangle on the right
+        1, 0,
+        0, 1,
+        1, 1,                   // Triangle on the left
+        0, 1,
+        1, 0
+    });
+    
+    points.insert(points.end(), {
+        vec::vec2(vertices[0], vertices[1]),    // Top Left
+        vec::vec2(vertices[2], vertices[3]),    // Top Right
+        vec::vec2(vertices[6], vertices[7]),    // Bottom Right
+        vec::vec2(vertices[4], vertices[5])     // Bottom Left
+    });
 }
 
 void Rectangle::draw(Shader* shader) {
@@ -116,36 +85,37 @@ void Rectangle::draw(Shader* shader) {
     
     glVertexAttribPointer(shader->getPositionAttrib(), 2, GL_FLOAT, GL_FALSE, 0, &vertices[0]);
     glEnableVertexAttribArray(shader->getPositionAttrib());
+    glVertexAttribPointer(shader->getTexCoordAttrib(), 2, GL_FLOAT, false, 0, &texCoord[0]);
+    glEnableVertexAttribArray(shader->getTexCoordAttrib());
     
-    if (texture) {
-        glVertexAttribPointer(shader->getTexCoordAttrib(), 2, GL_FLOAT, false, 0, &data[0]);
-        glEnableVertexAttribArray(shader->getTexCoordAttrib());
-        glBindTexture(GL_TEXTURE_2D, textureID);
-    } else {
-        glVertexAttribPointer(shader->getColorAttrib(), 4, GL_FLOAT, GL_FALSE, 0, &data[0]);
-        glEnableVertexAttribArray(shader->getColorAttrib());
-    }
-    
+    glBindTexture(GL_TEXTURE_2D, textureID);    
     glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_BYTE, &indices[0]);
     
     glDisableVertexAttribArray(shader->getPositionAttrib());
-    if (texture) {
-        glDisableVertexAttribArray(shader->getTexCoordAttrib());
-        glBindTexture(GL_TEXTURE_2D, 0);
-    } else
-        glDisableVertexAttribArray(shader->getColorAttrib());
-    
+    glDisableVertexAttribArray(shader->getTexCoordAttrib());
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     shader->unbind();
+    
+    be->draw(shader);
 }
 
 void Rectangle::update(float elapsed) {
-    if (!colliding)
-        translate(velocity.x * elapsed, velocity.y * elapsed);
+    translate(velocity.x * elapsed, velocity.y * elapsed);
+    
+    // Check if the BulletEmitter has been allocated for
+    if (be) {
+        be->update(elapsed);
+    }
 }
 
 void Rectangle::translate(float x, float y) {
     position.x += x;
     position.y += y;
+    
+    if (be) {
+        be->translate(x, y);
+    }
 }
 
 void Rectangle::scale(float x, float y) {
@@ -206,6 +176,53 @@ void Rectangle::LoadTexture(const char *image_path) {
     SDL_FreeSurface(surface);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void Rectangle::setupBulletEmitter(float width, float height, float rotate,
+                                   vec::vec2 scale, const char* textureFileName,
+                                   direction shootingDirection,
+                                   unsigned int maxBullets) {
+    if (!be) {
+        be = new BulletEmitter(width, height, vec::vec2(0.0f), maxBullets);
+        be->LoadTexture(textureFileName);
+        be->createBullets();
+        be->scale(scale.x, scale.y);
+        be->rotate(rotate);
+        
+        // Set the shooting position and the velocity
+        switch (shootingDirection) {
+            case TOP:
+            {
+                be->position = vec::vec2(position.x, position.y + height);
+                be->setVelocity(vec::vec2(0.0f, 0.15f));
+            } break;
+                
+            case RIGHT:
+            {
+                be->position = vec::vec2(position.x + width, position.y);
+                be->setVelocity(vec::vec2(0.15f, 0.0f));
+            } break;
+                
+            case BOTTOM:
+            {
+                be->position = vec::vec2(position.x, position.y - height);
+                be->setVelocity(vec::vec2(0.0f, -0.15f));
+            } break;
+                
+            case LEFT:
+            {
+                be->position = vec::vec2(position.x - width, position.y);
+                be->setVelocity(vec::vec2(-0.15f, 0.0f));
+            } break;
+                
+            default:
+                break;
+        }
+    }
+}
+
+void Rectangle::shootABullet() { be->shootABullet(); }
+
+
 
 
 

@@ -22,6 +22,7 @@
 // Angle that controls fading
 #define FADE 100.0f
 
+// Enumerations
 enum gameState { START_SCREEN, GAME };
 enum fade { FADING_IN, FADING_OUT };
 
@@ -82,10 +83,6 @@ private:
         // Players
         Rectangle* player1;
         Rectangle* player2;
-        Rectangle* bullet;
-    
-        // Bullet System
-        BulletEmitter* be;
 };
 
 #endif /* __PLATFORMER_HPP__ defined */
