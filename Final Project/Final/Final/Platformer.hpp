@@ -70,8 +70,7 @@ private:
     
     // Data
     
-        // Shader
-        Shader* shader;
+        // Shader        
         Shader* texShader;
     
         // Matrices

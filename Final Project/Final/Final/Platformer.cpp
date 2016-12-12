@@ -1,8 +1,8 @@
 #include "Platformer.hpp"
 
 Platformer::Platformer(float w, float h, const char* name): Game(w, h, name), elapsed(0.0f),
-lastFrameTicks(0.0f), totalTime(0.0f), pause(false), shader(nullptr), texShader(nullptr),
-player1(nullptr), player2(nullptr) {
+lastFrameTicks(0.0f), totalTime(0.0f), pause(false), texShader(nullptr), player1(nullptr),
+player2(nullptr) {
     if (!createWindow()) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
@@ -20,13 +20,8 @@ lastFrameTicks(0.0f), totalTime(0.0f), pause(false) {
 }
 
 Platformer::~Platformer() {
-    if (shader) {
-        printf("Freeing shader\n");
-        delete shader;
-    }
-    
     if (texShader) {
-        printf("Freeing textured shader\n");
+        printf("Freeing shader\n");
         delete texShader;
     }
     
@@ -67,9 +62,6 @@ void Platformer::setup() {
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
     
-    // Load, compile & link the untextured shaders
-    shader = new Shader("vertex.glsl", "fragment.glsl");
-    
     // Load, compile & link the textured shaders
     texShader = new Shader("vertex_textured.glsl", "fragment_textured.glsl");
     
@@ -87,10 +79,6 @@ void Platformer::setup() {
     
     // Set matrices & orthographic projection in each shader
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
-    shader->setModelMatrix(matrix);
-    shader->setViewMatrix(view);
-    shader->setProjectionMatrix(projection);
-    
     texShader->setModelMatrix(matrix);
     texShader->setViewMatrix(view);
     texShader->setProjectionMatrix(projection);
@@ -102,7 +90,7 @@ void Platformer::setup() {
     player1->translate(-1.777, 0.0f);
     player1->scale(1.5f, 1.5f);
     player1->setupBulletEmitter(0.5f, 2.0f, degreesToRadians(-90.0f),
-                                vec::vec2(0.125f, 0.125f), "assets/bullet.png",
+                                vec::vec2(0.1f, 0.1f), "assets/bullet.png",
                                 shootingDirection);
     
     // Setup player 2
@@ -113,7 +101,7 @@ void Platformer::setup() {
     player2->translate(1.777f, 0.0f);
     player2->scale(1.5f, 1.5f);
     player2->setupBulletEmitter(0.5f, 2.0f, degreesToRadians(90.0f),
-                                vec::vec2(0.125f, 0.125f), "assets/bullet.png",
+                                vec::vec2(0.1f, 0.1f), "assets/bullet.png",
                                 shootingDirection);
 }
 
@@ -178,7 +166,7 @@ void Platformer::draw() {
         } break;
         
         case GAME:
-        {
+        {            
             // Draw the players
             player1->draw(texShader);
             player2->draw(texShader);
