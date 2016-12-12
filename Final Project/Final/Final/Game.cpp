@@ -1,9 +1,10 @@
 #include "Game.hpp"
 
 Game::Game(float width, float height, const char* name)
-    : height(height), width(width), name(name) {}
+    : height(height), width(width), name(name), playing(true), window(nullptr) {}
 
-Game::Game(const char* name) : height(800), width(1280), name(name) {}
+Game::Game(const char* name) : height(800), width(1280), name(name),
+                                playing(true), window(nullptr) {}
 
 Game::~Game() {
     if (window) {
@@ -15,7 +16,7 @@ Game::~Game() {
 void Game::gameLoop() {
     if (window) {
         setup();
-        while(processEvents()) {
+        while(playing) {
             update();
             render();
         }
@@ -64,4 +65,5 @@ float Game::getWidth() const { return width; }
 
 float Game::getHeight() const { return height; }
 
+void Game::setPlayingFlag(bool p) { playing = p; }
 

@@ -20,14 +20,14 @@ public:
     void swapBuffers();
     float getWidth() const;
     float getHeight() const;
+    void setPlayingFlag(bool p);
     virtual void setup() = 0;
-    virtual bool processEvents() = 0;
     virtual void update() = 0;
     virtual void render() = 0;
     
 private:
     // SDL window
-    SDL_Window* window = nullptr;
+    SDL_Window* window;
     
     // SDL context
     SDL_GLContext context;
@@ -37,6 +37,9 @@ private:
     
     // Window name
     const char* name;
+    
+    // Game flag
+    bool playing;
 };
 
 

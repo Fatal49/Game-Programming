@@ -2,7 +2,7 @@
 #include "Rectangle.hpp"
 
 Rectangle::Rectangle(float w, float h, bool textured) : width(w), height(h),
-colliding(false), texture(textured) {}
+colliding(false), texture(textured), scaling(vec::vec2(1.0f, 1.0f)) {}
 
 Rectangle::Rectangle(const Rectangle& rhs): width(rhs.width), height(rhs.height),
 position(rhs.position), matrix(rhs.matrix), scaling(rhs.scaling), rotating(rhs.rotating),
@@ -34,60 +34,6 @@ textureID(rhs.textureID)
 void Rectangle::create() {
     float halfW = width * 0.5f;
     float halfH = height * 0.5f;
-    
-//    // Vertices
-//    vertices[0] = -halfW;       // Top Left
-//    vertices[1] = halfH;
-//    vertices[2] = halfW;        // Top Right
-//    vertices[3] = halfH;
-//    vertices[4] = 0;            // Center
-//    vertices[5] = 0;
-//    vertices[6] = -halfW;       // Bottom Left
-//    vertices[7] = -halfH;
-//    vertices[8] = halfW;       // Bottom Right
-//    vertices[9] = -halfH;
-    
-//    // Indices
-//    indices[0] = 0;            // Triangle on the top
-//    indices[1] = 1;
-//    indices[2] = 2;
-//    
-//    indices[3] = 0;            // Triangle on the right
-//    indices[4] = 2;
-//    indices[5] = 3;
-//    
-//    indices[6] = 1;            // Triangle on the left
-//    indices[7] = 2;
-//    indices[8] = 4;
-//    
-//    indices[9] = 3;            // Triangle on the bottom
-//    indices[10] = 2;
-//    indices[11] = 4;
-
-//        data[0] = 1.0f;            // Top Left
-//        data[1] = 0.0f;
-//        data[2] = 0.0f;
-//        data[3] = 1.0f;
-//
-//        data[4] = 0.0f;            // Top Right
-//        data[5] = 1.0f;
-//        data[6] = 0.0f;
-//        data[7] = 1.0f;
-//
-//        data[8] = 0.0f;            // Center
-//        data[9] = 0.0f;
-//        data[10] = 1.0f;
-//        data[11] = 1.0f;
-//
-//        data[12] = 0.0f;            // Bottom Left
-//        data[13] = 1.0f;
-//        data[14] = 0.0f;
-//        data[15] = 1.0f;
-//
-//        data[16] = 1.0f;            // Bottom Right
-//        data[17] = 0.0f;
-//        data[18] = 0.0f;
-//        data[19] = 1.0f;
     
     if (!texture) {
         vertices.clear();
@@ -183,10 +129,10 @@ void Rectangle::draw(Shader* shader) {
     glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_BYTE, &indices[0]);
     
     glDisableVertexAttribArray(shader->getPositionAttrib());
-    
-    if (texture)
+    if (texture) {
         glDisableVertexAttribArray(shader->getTexCoordAttrib());
-    else
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else
         glDisableVertexAttribArray(shader->getColorAttrib());
     
     shader->unbind();

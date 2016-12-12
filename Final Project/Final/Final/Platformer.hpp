@@ -6,6 +6,7 @@
 #include "Shader.hpp"
 #include "Matrix.hpp"
 #include "Rectangle.hpp"
+#include "BulletEmitter.hpp"
 #include <string>
 #include <SDL2_image/SDL_image.h>
 
@@ -34,7 +35,6 @@ public:
     
     // Overload functions
     void setup();
-    bool processEvents();
     void update();
     void render();
     
@@ -82,6 +82,10 @@ private:
         // Players
         Rectangle* player1;
         Rectangle* player2;
+        Rectangle* bullet;
+    
+        // Bullet System
+        BulletEmitter* be;
 };
 
 #endif /* __PLATFORMER_HPP__ defined */

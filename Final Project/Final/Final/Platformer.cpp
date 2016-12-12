@@ -2,7 +2,7 @@
 
 Platformer::Platformer(float w, float h, const char* name): Game(w, h, name), elapsed(0.0f),
 lastFrameTicks(0.0f), totalTime(0.0f), pause(false), shader(nullptr), texShader(nullptr),
-player1(nullptr), player2(nullptr) {
+player1(nullptr), player2(nullptr), bullet(nullptr), be(nullptr) {
     if (!createWindow()) {
         printf("The SDL window could not be created. Call again.\n");
     } else {
@@ -36,6 +36,12 @@ Platformer::~Platformer() {
     if (player2)
         delete player2;
     
+    if (bullet)
+        delete bullet;
+    
+    if (be)
+        delete be;
+    
     SDL_Quit();
 }
 
@@ -54,37 +60,6 @@ GLuint Platformer::LoadTexture(const char *image_path) {
     SDL_FreeSurface(surface);
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureID;
-}
-
-bool Platformer::processEvents() {
-    SDL_Event event;
-    
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            // Close the window on any SDL_QUIT event
-            case SDL_QUIT:
-                printf("SDL window is closing\n");
-                return false;
-                break;
-            
-            // Handle Keyboard input related to the window
-            case SDL_KEYUP:
-                switch (event.key.keysym.scancode) {
-                    case SDL_SCANCODE_ESCAPE:
-                        printf("SDL window is closing\n");
-                        return false;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-                
-            default:
-                break;
-        }
-    }
-    
-    return true;
 }
 
 void Platformer::setup() {
@@ -134,6 +109,15 @@ void Platformer::setup() {
     player2->create();
     player2->translate(1.777f, 0.0f);
     player2->scale(1.5f, 1.5f);
+    
+    // Setup the Bullet Emitter
+    be = new BulletEmitter(0.5f, 2.0f, 10, vec::vec2(0.06f, 0.0f));
+    be->LoadTexture("assets/bullet.png");
+    be->createBullets();
+    be->position = vec::vec2(0.0f, 0.5f);
+    be->scale(0.125f, 0.125f);
+    be->rotate(degreesToRadians(-90.0f));
+    
 }
 
 void Platformer::render() {
@@ -198,15 +182,21 @@ void Platformer::draw() {
         
         case GAME:
         {
+            // Draw player1 using the correct shader
             if (player1->texture)
                 player1->draw(texShader);
             else
                 player1->draw(shader);
             
+            // Draw player2 using the correct shader
             if (player2->texture)
                 player2->draw(texShader);
             else
                 player2->draw(shader);
+            
+            // Draw the bullets
+            be->draw(texShader);
+            
         } break;
             
         default:
@@ -231,8 +221,7 @@ void Platformer::update() {
                 case SDL_KEYDOWN:
                     switch (e.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
-                            gs = GAME;
-                            
+                            gs = GAME;              // Switch game modes
                         default:
                             break;
                     }
@@ -256,15 +245,17 @@ void Platformer::update() {
                 if (!pause) {
                     player1->update(FIXED_TIMESTEP);
                     player2->update(FIXED_TIMESTEP);
+                    be->update(FIXED_TIMESTEP);
                 }
             }
             
             if (!pause) {
                 player1->update(fixedElapsed);
                 player2->update(fixedElapsed);
+                be->update(fixedElapsed);
             }
             
-            // Handle input
+            // Get key input
             const Uint8* keys = SDL_GetKeyboardState(NULL);
             
             // Player 1 movement
@@ -285,7 +276,7 @@ void Platformer::update() {
             }
             
             
-            // Player 1 movement
+            // Player 2 movement
             if (keys[SDL_SCANCODE_RIGHT]) {
                 player2->translate(0.035f, 0.0f);
             }
@@ -303,36 +294,22 @@ void Platformer::update() {
             }
             
             SDL_Event e;
-            SDL_PollEvent(&e);
-            switch (e.type) {
-                case SDL_KEYDOWN:
-                    switch (e.key.keysym.scancode) {
-                            
-                        default:
-                            break;
-                    }
-                    break;
+            while (SDL_PollEvent(&e)) {
+                if (e.type == SDL_KEYDOWN) {
+                    if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                        setPlayingFlag(false);
                     
-                case SDL_KEYUP:
-                    switch (e.key.keysym.scancode) {
-                        case SDL_SCANCODE_SPACE:
-                            pause = true;
-                            break;
-                            
-                        default:
-                            break;
+                    if (e.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                        printf("I am in the while loop \n");
+                        be->shootABullet();
                     }
-                    break;
-                    
-                default:
-                    break;
+                }
             }
         } break;
             
         default:
             break;
     }
-    
 }
 
 void Platformer::DrawText(Shader *program, GLuint fontTexture,

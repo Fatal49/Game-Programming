@@ -5,20 +5,21 @@
 #include "Shader.hpp"
 #include "vec.h"
 #include <vector>
+#include <SDL2_image/SDL_image.h>
 
 struct Bullet {
     Bullet() {}
-    Bullet(vec::vec2 p, vec::vec2 v) : position(p), velocity(v) {}
+    Bullet(vec::vec2 p, bool alive = false): position(p), alive(alive) {}
     
     vec::vec2 position;
-    vec::vec2 velocity;
+    bool alive;
 };
 
 class BulletEmitter {
 public:
     
     // Constructors and deconstructors
-    BulletEmitter(unsigned int maxBullets, vec::vec2 v);
+    BulletEmitter(float w, float h, unsigned int maxBullets, vec::vec2 v);
     BulletEmitter(unsigned int maxBullets);
     BulletEmitter(const BulletEmitter& rhs);
     ~BulletEmitter();
@@ -28,18 +29,43 @@ public:
     
     // Data
     vec::vec2 position;
+    Matrix matrix;
     
     // Methods
     void setVelocity(vec::vec2 v);
-    void draw();
+    float getWidth();
+    float getHeight();
+    
+    void scale(float x, float y);
+    void translate(float x, float y);
+    void rotate(float angle);
+    
+    void createBullets();
+    void LoadTexture(const char *image_path);
+    bool shootABullet();
+    void draw(Shader* shader);
     void update(float elapsed);
     
 private:
     
+    // ID's
+    GLuint textureID;
+    
     // Data
+    float width;
+    float height;
+    float angle;
     vec::vec2 velocity;
+    vec::vec2 scaling;
     unsigned int maxBullets;
+    
+    // Containers
     std::vector<Bullet> bullets;
+    std::vector<GLfloat> vertices;
+    std::vector<GLubyte> indices;
+    std::vector<GLfloat> texCoord;
+    std::vector<vec::vec2> points;
+    
 };
 
 
