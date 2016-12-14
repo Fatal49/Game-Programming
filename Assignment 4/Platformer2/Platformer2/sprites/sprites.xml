@@ -1,5 +1,0 @@
-<TextureAtlas imagePath="sprites.png">
-	<SubTexture name="mario_25.png" x="39" y="0" width="34" height="58"/>
-	<SubTexture name="mario_26.png" x="75" y="0" width="32" height="59"/>
-	<SubTexture name="mario_27.png" x="0" y="0" width="37" height="58"/>
-</TextureAtlas>

@@ -1,10 +1,3 @@
-//
-//  types.h
-//  Platformer
-//
-//  Created by Hassani Senior on 11/5/16.
-//  Copyright © 2016 Hassani Senior. All rights reserved.
-//
 
 #ifndef __TYPES_H__
 #define __TYPES_H__
@@ -13,6 +6,7 @@
 
 // entity
 enum EntityType { ENTITY_PLAYER, ENTITY_ENEMY, ENTITY_COIN };
+
 enum EntityCollPlacement { TOP, RIGHT, BOTTOM, LEFT };
 struct collInfo {
     EntityCollPlacement ecp;

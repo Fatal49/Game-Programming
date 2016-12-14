@@ -5,6 +5,8 @@
 #include "vec.h"
 #include <vector>
 #include "Tile.hpp"
+#include "Entity.hpp"
+#include "SpriteSheet.hpp"
 #include <SDL2_image/SDL_image.h>
 
 #define FIXED_TIMESTEP 0.0166666f
@@ -15,9 +17,12 @@
 #define TILE_HEIGHT 16.0f
 #define SPRITE_SHEET_WIDTH 384.0f
 #define SPRITE_SHEET_HEIGHT 256.0f
-#define DRAW_SIZE 0.025f
+#define DRAW_SIZE 0.04f
 #define SPRITE_COUNT_X 24.0f
 #define SPRITE_COUNT_Y 16.0f
+#define OPEN_GL_X 7.1f
+
+#define OPEN_GY_Y 4.0f
 
 class Platformer : public Game {
 public:
@@ -65,6 +70,7 @@ private:
         // Containers        
         std::vector<GLfloat> vertices;
         std::vector<GLfloat> texCoords;
+        std::vector<Entity*> entities;
 };
 
 

@@ -6,11 +6,8 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
-#include "Entity.hpp"
+#include "Shader.hpp"
 #include "types.h"
-#include "Tile.hpp"
-
-#define DRAW_NO_TILE 1000
 
 class Sprite {
 private:
@@ -23,18 +20,23 @@ public:
     // Constructors
     Sprite();
     Sprite(GLuint textureID, float u, float v,
-                float width, float height, float size);
+           float width, float height, float tw, float th, float openGlX,
+           float openglY, float w, float h, float s);
     Sprite(const Sprite& rhs);
     
     // Data
-    float size;
     GLuint textureID;
     float u;
     float v;
     float width;
     float height;
-    float texHeight;
-    float texWidth;
+    float tw;
+    float th;
+    float openGlX;
+    float openGlY;
+    float w;
+    float h;
+    float size;
     Matrix model, view, projection;
     GLfloat texCoords[12];
     float vertices[12];

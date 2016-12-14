@@ -5,6 +5,7 @@
 #include "types.h"
 #include "Shader.hpp"
 #include "Matrix.hpp"
+#include "Entity.hpp"
 #include <fstream>
 #include <vector>
 #include <SDL2/SDL_opengl.h>
@@ -24,15 +25,15 @@ public:
     Matrix projection;
     
     // Methods
-    void readFlareMap(const char* fn);
-    void useMapData(int SPRITE_COUNT_X, int SPRITE_COUNT_Y);
+    void readFlareMap(const char* fn, std::vector<Entity*>& entities);
+    void useMapData(int SPRITE_COUNT_X, int SPRITE_COUNT_Y, float TILE_SIZE);
     void draw(Shader* program);
     void loadTexture(const char* image_path);
+    GLuint getTextureId() const;
     
 private:
     
     // Sprite sheet info
-    GLuint ssID;
     float TILE_WIDTH;
     float TILE_HEIGHT;
     
@@ -53,6 +54,7 @@ private:
     // Methods
     void getHeaderInfo(std::ifstream& ipf);
     void readMapData(std::ifstream& ipf);
+    void getEntityData(std::ifstream& ipf, std::vector<Entity*>& entities);
     
 };
 

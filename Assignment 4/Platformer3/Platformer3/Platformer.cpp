@@ -24,6 +24,10 @@ Platformer::~Platformer() {
     
     if (tile)
         delete tile;
+    
+    if (!entities.empty())
+        for (size_t i = 0; i < entities.size(); i++)
+            delete entities[i];
       
     SDL_Quit();
 }
@@ -91,7 +95,7 @@ void Platformer::setup() {
     
     // Set matrices & orthographic projection
     projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
-    model.Translate(-3.55f, 2.0f, 0.0f);
+    // model.Translate(-3.55f, 2.0f, 0.0f);
     shader->setModelMatrix(model);
     shader->setViewMatrix(view);
     shader->setProjectionMatrix(projection);
@@ -118,43 +122,7 @@ void Platformer::setup() {
 //        }
 //    }
     
-//    vertices.push_back(-0.5f);                // Top Left
-//    vertices.push_back(0.5f);
-//    
-//    vertices.push_back(-0.5f);                // Bottom Left
-//    vertices.push_back(-0.5f);
-//    
-//    vertices.push_back(0.5f);                 // Top Right
-//    vertices.push_back(0.5f);
-//    
-//    vertices.push_back(-0.5f);                // Bottom Left
-//    vertices.push_back(-0.5f);
-//    
-//    vertices.push_back(0.5f);                 // Bottom Right
-//    vertices.push_back(-0.5f);
-//    
-//    vertices.push_back(0.5f);                 // Top Right
-//    vertices.push_back(0.5f);
-    
-    
-    
-//    vertices.push_back(0.0f);
-//    vertices.push_back(0.0f);
-//    
-//    vertices.push_back(0.0f);
-//    vertices.push_back(-1.0f / 12.0f);
-//    
-//    vertices.push_back(2.0f / 21.0f);
-//    vertices.push_back(0.0f);
-//    
-//    vertices.push_back(0.0f);
-//    vertices.push_back(-1.0f / 12.0f);
-//    
-//    vertices.push_back(2.0f / 21.0f);
-//    vertices.push_back(-1.0f / 12.0f);
-//    
-//    vertices.push_back(2.0f / 21.0f);
-//    vertices.push_back(0.0f);
+
     
     // Texture coordinates
 //    for (size_t i = 0; i < w * h; i++) {
@@ -185,34 +153,39 @@ void Platformer::setup() {
 //        });
 //    }
     
-    
-//    texCoords[0] = 0;
-//    texCoords[1] = 0;
-//    
-//    texCoords[2] = 0;
-//    texCoords[3] = 1;
-//    
-//    texCoords[4] = 1;
-//    texCoords[5] = 0;
-//    
-//    texCoords[6] = 0;
-//    texCoords[7] = 1;
-//    
-//    texCoords[8] = 1;
-//    texCoords[9] = 1;
-//    
-//    texCoords[10] = 1;
-//    texCoords[11] = 0;
-    
     // Load the textures
 //    tex1 = LoadTexture("assets/grassCenterBlock.png");
 //    tex1 = LoadTexture("assets/dirt-tiles.png");
     
     // Create the Tile
     tile = new Tile(getWidth(), getHeight(), 16.0f, 16.0f, 7.1f, 4.0f);
-    tile->readFlareMap("assets/level.txt");
+    tile->readFlareMap("assets/level.txt", entities);
     tile->loadTexture("assets/dirt-tiles.png");
-    tile->useMapData(24.0f, 16.0f);    
+    tile->useMapData(24.0f, 16.0f, DRAW_SIZE);
+    tile->model.Translate(-1.0, 0.43f, 0.0f);
+//    tile->projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
+    
+    // (7.1f / ((float)getWidth() / TILE_WIDTH)) * (4.0f / ((float)getHeight() / TILE_HEIGHT))
+    
+    // Setup the player
+    entities[1]->sprite = new Sprite(tile->getTextureId(), (18.0 * TILE_WIDTH) / SPRITE_SHEET_WIDTH,
+                                                           (1.0f * TILE_HEIGHT) / SPRITE_SHEET_HEIGHT,
+                                                           1.0f / SPRITE_COUNT_X,
+                                                           1.0f / SPRITE_COUNT_Y,
+                                                           TILE_WIDTH, TILE_HEIGHT,
+                                                           OPEN_GL_X, OPEN_GY_Y,
+                                                           getWidth(), getHeight(), DRAW_SIZE);
+                                     
+    entities[1]->openglX = 7.1f;
+    entities[1]->openglY = 4.0f;
+    entities[1]->width = getWidth();
+    entities[1]->height = getHeight();
+    entities[1]->tileWidth = TILE_WIDTH;
+    entities[1]->tileHeight = TILE_HEIGHT;
+    
+    entities[1]->coordInit();
+//    entities[1]->sprite->model.Translate(-3.5f, 0.0f, 0.0f);
+//    entities[1]->sprite->projection.setOrthoProjection(-3.55, 3.55, -2.0f, 2.0f, -1.0f, 1.0f);
 }
 
 void Platformer::render() {
@@ -244,6 +217,8 @@ void Platformer::draw() {
 //    glDisableVertexAttribArray(shader->getTexCoordAttrib());
     
     tile->draw(shader);
+    
+    entities[1]->draw(shader);
 }
 
 void Platformer::update() {
